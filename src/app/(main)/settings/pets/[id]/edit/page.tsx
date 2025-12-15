@@ -1,4 +1,4 @@
-import { getPet, updatePet } from "@/actions/pet";
+import { getPet } from "@/actions/pet";
 import RegistrationWizard from "@/components/register/RegistrationWizard";
 import { redirect } from "next/navigation";
 
@@ -27,10 +27,9 @@ export default async function EditPetPage({ params }: { params: { id: string } }
         concern: pet.concerns,
         photo: pet.photo_url,
         reg_number: pet.registration_number,
-        // Missing fields in Pet interface but needed for form:
-        weight: null,
-        color: null,
-        adoptionDate: null
+        weight: pet.weight,
+        color: pet.color,
+        adoptionDate: pet.adoption_date
     };
 
     return (

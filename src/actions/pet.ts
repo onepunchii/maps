@@ -2,17 +2,62 @@
 
 import { createClient } from "@/lib/supabase/server";
 
+// Update Pet interface
 export interface Pet {
     id: string;
     name: string;
-    photo_url: string | null; // DB column snake_case usually
+    photo_url: string | null;
     gender: "male" | "female";
     breed: string | null;
     birth_date: string | null;
-    concerns: string[] | null; // assuming jsonb or array
+    concerns: string[] | null;
     species: string | null;
     registration_number: string | null;
     neuter: boolean | null;
+    weight: string | null;
+    color: string | null;
+    adoption_date: string | null;
+}
+
+// ... imports
+
+// Update getPet function return
+export async function getPet(petId: string) {
+    try {
+        const supabase = await createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) return null;
+
+        const { data, error } = await supabase
+            .from("pets")
+            .select("*")
+            .eq("id", petId)
+            .eq("user_id", user.id)
+            .single();
+
+        if (error || !data) return null;
+
+        const pet = data;
+        return {
+            id: pet.id,
+            name: pet.pet_name,
+            photo_url: pet.profile_photo_url,
+            gender: pet.gender === "MALE" ? "male" : "female",
+            breed: pet.breed,
+            birth_date: pet.birth_date,
+            concerns: pet.health_concerns ? pet.health_concerns.split(",") : [],
+            species: pet.species === "CAT" ? "cat" : "dog",
+            registration_number: pet.reg_num,
+            neuter: pet.neutered === "Y",
+            weight: pet.weight_kg ? String(pet.weight_kg) : null,
+            color: pet.fur_color,
+            adoption_date: pet.adoption_date
+        } as Pet;
+    } catch (error) {
+        console.error("Error fetching pet:", error);
+        return null;
+    }
 }
 
 
@@ -118,7 +163,10 @@ export async function getPets() {
             concerns: pet.health_concerns ? pet.health_concerns.split(",") : [],
             species: pet.species === "CAT" ? "cat" : "dog",
             registration_number: pet.reg_num,
-            neuter: pet.neutered === "Y"
+            neuter: pet.neutered === "Y",
+            weight: pet.weight_kg ? String(pet.weight_kg) : null,
+            color: pet.fur_color,
+            adoption_date: pet.adoption_date
         })) as Pet[];
     } catch (error) {
         console.error("Unexpected error in getPets:", error);
@@ -126,40 +174,7 @@ export async function getPets() {
     }
 }
 
-export async function getPet(petId: string) {
-    try {
-        const supabase = await createClient();
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        if (authError || !user) return null;
-
-        const { data, error } = await supabase
-            .from("pets")
-            .select("*")
-            .eq("id", petId)
-            .eq("user_id", user.id)
-            .single();
-
-        if (error || !data) return null;
-
-        const pet = data;
-        return {
-            id: pet.id,
-            name: pet.pet_name,
-            photo_url: pet.profile_photo_url,
-            gender: pet.gender === "MALE" ? "male" : "female",
-            breed: pet.breed,
-            birth_date: pet.birth_date,
-            concerns: pet.health_concerns ? pet.health_concerns.split(",") : [],
-            species: pet.species === "CAT" ? "cat" : "dog",
-            registration_number: pet.reg_num,
-            neuter: pet.neutered === "Y"
-        } as Pet;
-    } catch (error) {
-        console.error("Error fetching pet:", error);
-        return null;
-    }
-}
 
 export async function updatePet(petId: string, formData: PetFormData) {
     try {
