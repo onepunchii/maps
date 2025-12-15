@@ -13,7 +13,7 @@ interface RegistrationFormData {
     birth?: Date | string;
     photo?: File | string | null;
     gender?: "male" | "female" | string;
-    neuter?: boolean; // In wizard it might be string "yes"/"no", checking implementation
+    neuter?: boolean | string; // In wizard it might be string "yes"/"no", checking implementation
     color?: string;
     registrationNumber?: string;
     species?: string;
