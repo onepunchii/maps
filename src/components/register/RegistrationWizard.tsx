@@ -197,7 +197,7 @@ export default function RegistrationWizard() {
         return (
             <RegistrationSuccess3D
                 onComplete={() => router.push("/")}
-                formData={formData}
+                formData={formData as any}
             />
         );
     }
