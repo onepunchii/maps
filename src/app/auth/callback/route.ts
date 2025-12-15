@@ -5,7 +5,7 @@ import { users } from "@/lib/db/schema";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const origin = (new URL(request.url)).origin.replace("0.0.0.0", "localhost");
+    const origin = (new URL(request.url)).origin;
     const code = searchParams.get("code");
     // if "next" is in param, use it as the redirect URL
     const next = searchParams.get("next") ?? "/"; // default to home

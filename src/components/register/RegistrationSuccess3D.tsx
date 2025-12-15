@@ -51,8 +51,12 @@ export default function RegistrationSuccess3D({ onComplete, formData, viewMode =
         return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
     };
 
-    const genderText = formData.gender === "male" ? "수컷 (Male)" : "암컷 (Female)";
-    const neuterText = formData.neuter ? "완료 (Yes)" : "미완료 (No)";
+    const isMale = formData.gender === "male" || formData.gender === "MALE";
+    const genderText = isMale ? "수컷 (Male)" : "암컷 (Female)";
+
+    // Handle both boolean (from DB) and string "yes"/"no" (from Wizard form)
+    const isNeutered = formData.neuter === true || formData.neuter === "yes" || formData.neuter === "Y";
+    const neuterText = isNeutered ? "완료 (Yes)" : "미완료 (No)";
     const colorText = formData.color || "모색 없음";
 
     // Removed photoUrl state and useEffect as the img src can handle it directly.

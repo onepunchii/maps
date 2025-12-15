@@ -123,7 +123,10 @@ export default function PetSettingsPage({ initialPets }: PetSettingsPageProps) {
                                             <IdCard className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                                         </button>
                                         {/* Edit Button */}
-                                        <button className="w-9 h-9 rounded-full bg-[#222] border border-[#333] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#333] transition-colors">
+                                        <button
+                                            onClick={() => router.push(`/settings/pets/${pet.id}/edit`)}
+                                            className="w-9 h-9 rounded-full bg-[#222] border border-[#333] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#333] transition-colors"
+                                        >
                                             <Pencil className="w-4 h-4" />
                                         </button>
                                     </div>

@@ -1,28 +1,35 @@
-import { createClient } from "@/lib/supabase/server";
-import { db } from "@/lib/db";
-import { signOutAction, deletePetAction } from "@/actions/user";
-import { redirect } from "next/navigation";
+"use client";
+
+import { deletePetAction, signOutAction } from "@/actions/user";
+import { AddPetDialog } from "./add-pet-dialog";
 import Image from "next/image";
-import { User, LogOut, Plus, Trash2 } from "lucide-react";
-import { AddPetDialog } from "./add-pet-dialog"; // Will create next
+import { LogOut, Plus, Trash2, User } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default async function MyPage() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+export default function MyPage() {
+    const { data: profile, isLoading } = useProfile();
+    const router = useRouter();
 
-    if (!user) {
-        redirect("/login");
+    useEffect(() => {
+        if (!isLoading && !profile) {
+            router.push("/login"); // Handle unauthorized manually if redirect fails
+        }
+    }, [isLoading, profile, router]);
+
+    if (isLoading) {
+        return <div className="min-h-screen bg-bg-main flex items-center justify-center text-white">Loading...</div>; // Replace with Skeleton later
     }
 
-    const profile = await db.query.users.findFirst({
-        where: (p, { eq }) => eq(p.id, user.id),
-        with: {
-            pets: true,
-        },
-    });
+    if (!profile) return null; // Redirecting or waiting for profile
 
-    if (!profile) return <div>Load Error...</div>;
+    return <MyPageContent profile={profile} />;
+}
 
+
+// Extracted for clean render
+function MyPageContent({ profile }: { profile: any }) {
     return (
         <div className="min-h-screen bg-bg-main p-6 pb-24 space-y-8 text-white">
             <header className="flex justify-between items-center">
@@ -34,8 +41,10 @@ export default async function MyPage() {
                 </form>
             </header>
 
+            {/* Same UI as before */}
             {/* Profile Card */}
             <div className="flex items-center gap-4 bg-bg-card p-5 rounded-[20px] shadow-lg border border-[#333] relative overflow-hidden group">
+                {/* ... */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-petudy-lime/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
 
                 <div className="w-16 h-16 bg-[#2C2C2E] rounded-full flex items-center justify-center overflow-hidden border-2 border-[#333] group-hover:border-petudy-lime transition-colors">
@@ -74,7 +83,7 @@ export default async function MyPage() {
                             <p className="text-gray-600 text-xs mt-1">아이를 등록하고 맞춤 서비스를 받아보세요!</p>
                         </div>
                     ) : (
-                        profile.pets.map((pet) => (
+                        profile.pets.map((pet: any) => (
                             <div key={pet.id} className="bg-bg-card p-5 rounded-[20px] border border-[#333] flex justify-between items-center shadow-lg hover:border-petudy-lime/30 transition-colors group">
                                 <div className="flex gap-4 items-center">
                                     <div className="w-12 h-12 bg-[#2C2C2E] rounded-full flex items-center justify-center text-2xl border border-[#333] group-hover:scale-110 transition-transform">
@@ -86,8 +95,8 @@ export default async function MyPage() {
                                             {/* Gender Badge */}
                                             {pet.gender && (
                                                 <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${pet.gender === 'MALE'
-                                                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                                                        : 'bg-pink-500/20 text-pink-400 border border-pink-500/30'
+                                                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                                    : 'bg-pink-500/20 text-pink-400 border border-pink-500/30'
                                                     }`}>
                                                     {pet.gender === 'MALE' ? '남' : '여'}
                                                 </span>
@@ -111,3 +120,4 @@ export default async function MyPage() {
         </div>
     );
 }
+

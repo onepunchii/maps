@@ -90,3 +90,19 @@ export async function deletePetAction(petId: string) {
     await db.delete(pets).where(eq(pets.id, petId));
     revalidatePath("/mypage");
 }
+
+export async function getUserProfile() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    const profile = await db.query.users.findFirst({
+        where: (p, { eq }) => eq(p.id, user.id),
+        with: {
+            pets: true,
+        },
+    });
+
+    return profile;
+}

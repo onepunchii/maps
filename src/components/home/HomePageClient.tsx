@@ -2,36 +2,30 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { User, Plus } from "lucide-react";
 import PetSelectionSheet from "@/components/shared/PetSelectionSheet";
 import { Pet } from "@/actions/pet";
+import { usePets } from "@/hooks/usePets";
 
-interface HomePageClientProps {
-    initialPets: Pet[];
-}
-
-export default function HomePageClient({ initialPets }: HomePageClientProps) {
+export default function HomePageClient() {
+    const { data: initialPets = [] } = usePets();
     const [currentPet, setCurrentPet] = useState<Pet | null>(null);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     useEffect(() => {
-        // Initializes state: prioritizing passed recent pet or first pet
-        // We can still check localStorage for "last selected pet ID" if we want persistence
-        // For now, let's default to the first pet if available.
-        if (initialPets.length > 0) {
-            // Check if there's a stored pet ID preference
+        // Only set default pet if we have pets and haven't selected one yet
+        if (initialPets.length > 0 && !currentPet) {
             const storedId = localStorage.getItem("petudy_current_pet_id");
-            const found = initialPets.find(p => p.id === storedId);
+            const found = initialPets.find((p: Pet) => p.id === storedId);
 
             if (found) {
                 setCurrentPet(found);
             } else {
                 setCurrentPet(initialPets[0]);
             }
-        } else {
-            setCurrentPet(null);
         }
-    }, [initialPets]);
+    }, [initialPets, currentPet]);
 
     const handleSelectPet = (pet: Pet) => {
         setCurrentPet(pet);
@@ -50,7 +44,7 @@ export default function HomePageClient({ initialPets }: HomePageClientProps) {
         { title: "펫터디 멤버십", icon: "👑", href: "/membership", isBanner: true }, // Landing Banner
         { title: "펫보험", icon: "🛡️", href: "/booking/new?category=INSURANCE" },
         { title: "펫상조", icon: "🌺", href: "/booking/new?category=MUTUAL_AID" },
-        { title: "펫여행", icon: "✈️", href: "/booking/new?category=TRAVEL" },
+        { title: "펫여행", icon: "🛡️", href: "/booking/new?category=TRAVEL" },
         { title: "멍BTI", icon: "🧠", href: "/mbti", isMbti: true },
     ];
 
@@ -74,7 +68,15 @@ export default function HomePageClient({ initialPets }: HomePageClientProps) {
                 >
                     {petPhoto ? (
                         <>
-                            <img src={petPhoto} alt="Profile" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+                            <div className="relative w-full h-full">
+                                <Image
+                                    src={petPhoto}
+                                    alt="Profile"
+                                    fill
+                                    className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                    sizes="48px"
+                                />
+                            </div>
                             <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                         </>
                     ) : (
