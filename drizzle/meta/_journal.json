@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1765660926114,
+      "tag": "0000_adorable_energizer",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1765709191859,
+      "tag": "0001_narrow_darwin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765710947421,
+      "tag": "0002_panoramic_maria_hill",
+      "breakpoints": true
+    }
+  ]
+}

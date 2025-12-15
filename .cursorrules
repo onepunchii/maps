@@ -1,0 +1,40 @@
+# Cursor Rules & Coding Standards
+
+## 1. General Principles
+
+- **Framework:** Next.js 14+ (App Router) is the standard. Use Server Components by default.
+- **Language:** TypeScript only. Use strict types (avoid `any`).
+- **Styling:** Tailwind CSS is mandatory. Use `lucide-react` for icons.
+- **State Management:** Use TanStack Query for async data, Zustand for global UI state.
+
+## 2. Mobile First Strategy (CRITICAL)
+
+- **Layout:** All pages must be wrapped in a container with `max-w-[430px] mx-auto min-h-screen` to simulate a mobile app experience on desktop.
+- **UX:** Design for touch interactions (min tap target 44px).
+- **Navigation:** Use Bottom Navigation Bar for main screens.
+- **Responsiveness:** Ensure 100% width on actual mobile devices.
+
+## 3. MCP Tool Usage (MANDATORY)
+
+- **Sequential Thinking:** logic building, refactoring, or architectural planning is required, YOU MUST use the `sequential-thinking` tool to structure your thoughts before writing code.
+- **Context7:**  When using external libraries (Supabase, Drizzle, etc.), YOU MUST use `context7` to fetch the latest documentation and best practices. Do not rely solely on training data.
+  - Example: `resolve-library-id` -> `get-library-docs` -> `implementation`
+
+## 4. Code Style
+
+- Use Functional Components with arrow functions.
+- Use `const` for variable declarations.
+- Async/Await over `.then()`.
+- Filenames: `kebab-case` for files/folders in `app`, `PascalCase` for components.
+
+## 5. Supabase & Database
+
+- Do NOT expose Supabase Service Key in Client side.
+- Use `actions` (Server Actions) for mutations (Create/Update/Delete).
+- Ensure RLS (Row Level Security) policies are enabled on Supabase.
+- Use Drizzle ORM for all database interactions.
+
+## 6. Integrity Protection
+
+- **Do NOT delete existing logic** without confirmation. Comment it out if necessary.
+- Always check `CONTEXT.md` before starting a complex task.
