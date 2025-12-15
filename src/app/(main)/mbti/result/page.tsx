@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PetPassCard, MbtiType } from "@/components/shared/PetPassCard";
 import { Share2, CheckCircle } from "lucide-react";
 
-export default function MbtiResultPage() {
+function MbtiResultContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const type = (searchParams.get("type") as MbtiType) || "SOCIAL";
@@ -84,5 +84,13 @@ export default function MbtiResultPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function MbtiResultPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-bg-main" />}>
+            <MbtiResultContent />
+        </Suspense>
     );
 }

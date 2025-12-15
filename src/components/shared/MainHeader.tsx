@@ -55,8 +55,9 @@ export default function MainHeader() {
             <PetSelectionSheet
                 isOpen={isSheetOpen}
                 onClose={() => setIsSheetOpen(false)}
-                currentPetName={petName}
-                currentPetPhoto={petPhoto}
+                currentPetId={null}
+                pets={[]}
+                onSelectPet={() => { }}
             />
         </>
     );

@@ -2,16 +2,16 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowRight, ChevronRight, X } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 
-type IntroContent = {
+type IntroStep = {
     title: string;
     description: string;
     image: string; // Emoji or image URL
     bgGradient: string;
 };
 
-const introData: Record<string, { title: string; steps: IntroContent[] }> = {
+const introData: Record<string, { title: string; steps: IntroStep[] }> = {
     BATH: {
         title: "미용 예약",
         steps: [
@@ -83,7 +83,7 @@ const introData: Record<string, { title: string; steps: IntroContent[] }> = {
     }
 };
 
-export default function IntroPage() {
+function IntroPageContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const category = searchParams.get("category") || "BATH";
@@ -210,5 +210,13 @@ export default function IntroPage() {
                 }
             `}</style>
         </div>
+    );
+}
+
+export default function IntroPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-bg-main" />}>
+            <IntroPageContent />
+        </Suspense>
     );
 }
