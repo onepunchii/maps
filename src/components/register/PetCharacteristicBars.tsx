@@ -16,12 +16,14 @@ export default function PetCharacteristicBars({ traits }: PetCharacteristicBarsP
         return () => clearTimeout(timer);
     }, []);
 
+    if (!traits) return null;
+
     const items = [
-        { label: "크기", value: traits.size, color: "bg-blue-400", emoji: "📏", maxEmoji: "🐘", minEmoji: "🐁" },
-        { label: "털빠짐", value: traits.shedding, color: "bg-orange-400", emoji: "☁️", maxEmoji: "🌪️", minEmoji: "✨" },
-        { label: "친화력", value: traits.friendliness, color: "bg-pink-400", emoji: "💕", maxEmoji: "🥰", minEmoji: "😐" },
-        { label: "학습력", value: traits.trainability, color: "bg-purple-400", emoji: "🧠", maxEmoji: "🎓", minEmoji: "🍼" },
-        { label: "실내/외", value: traits.energy, color: "bg-green-400", emoji: "🏠", maxEmoji: "🏞️", minEmoji: "🛋️" },
+        { label: "크기", value: traits.size || 3, color: "bg-blue-400", emoji: "📏", maxEmoji: "🐘", minEmoji: "🐁" },
+        { label: "털빠짐", value: traits.shedding || 3, color: "bg-orange-400", emoji: "☁️", maxEmoji: "🌪️", minEmoji: "✨" },
+        { label: "친화력", value: traits.friendliness || 3, color: "bg-pink-400", emoji: "💕", maxEmoji: "🥰", minEmoji: "😐" },
+        { label: "학습력", value: traits.trainability || 3, color: "bg-purple-400", emoji: "🧠", maxEmoji: "🎓", minEmoji: "🍼" },
+        { label: "실내/외", value: traits.energy || 3, color: "bg-green-400", emoji: "🏠", maxEmoji: "🏞️", minEmoji: "🛋️" },
     ];
 
     return (

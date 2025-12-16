@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import html2canvas from "html2canvas";
 import { Home, Download, X } from "lucide-react";
 import { ALL_PET_BREEDS } from "@/data/petData";
 import { QRCodeCanvas } from "qrcode.react";
@@ -99,6 +98,9 @@ export default function RegistrationSuccess3D({ onComplete, formData, viewMode =
         setIsDownloading(true);
 
         try {
+            // Dynamic import to prevent SSR/Load issues
+            const html2canvas = (await import("html2canvas")).default;
+
             const canvas = await html2canvas(cardRef.current, {
                 backgroundColor: null, // Transparent background
                 scale: 2, // Higher resolution
@@ -106,7 +108,7 @@ export default function RegistrationSuccess3D({ onComplete, formData, viewMode =
             });
 
             const link = document.createElement("a");
-            link.download = `petudy - card - ${formData.name || "pet"}.png`;
+            link.download = `petudy-card-${formData.name || "pet"}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
         } catch (err) {
