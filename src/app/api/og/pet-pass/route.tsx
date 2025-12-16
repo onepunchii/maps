@@ -21,9 +21,18 @@ export async function GET(req: NextRequest) {
         const color = searchParams.get('color') || '모색 미상';
         // const species = searchParams.get('species');
 
-        // Font loading - Noto Sans KR for Korean support
-        const fontData = await fetch(new URL('https://github.com/google/fonts/raw/main/ofl/notosanskr/NotoSansKR-Bold.ttf')).then((res) => res.arrayBuffer());
-        const fontDataRegular = await fetch(new URL('https://github.com/google/fonts/raw/main/ofl/notosanskr/NotoSansKR-Regular.ttf')).then((res) => res.arrayBuffer());
+        // Font loading - Noto Sans KR for Korean support (Bold only for efficiency)
+        let fontData: ArrayBuffer | null = null;
+        try {
+            const fontResponse = await fetch(new URL('https://github.com/google/fonts/raw/main/ofl/notosanskr/NotoSansKR-Bold.ttf'));
+            if (fontResponse.ok) {
+                fontData = await fontResponse.arrayBuffer();
+            } else {
+                console.error("Font fetch failed:", fontResponse.statusText);
+            }
+        } catch (fontError) {
+            console.error("Font load error:", fontError);
+        }
 
         // Process Data
         const genderText = gender === 'male' ? '수컷 (Male)' : gender === 'female' ? '암컷 (Female)' : '성별 미상';
@@ -38,6 +47,22 @@ export async function GET(req: NextRequest) {
             }
         }
 
+        const imageOptions: any = {
+            width: 420,
+            height: 640,
+        };
+
+        if (fontData) {
+            imageOptions.fonts = [
+                {
+                    name: 'NotoSansKR',
+                    data: fontData,
+                    style: 'normal',
+                    weight: 700,
+                }
+            ];
+        }
+
         return new ImageResponse(
             (
                 <div
@@ -49,6 +74,7 @@ export async function GET(req: NextRequest) {
                         alignItems: 'center',
                         justifyContent: 'center',
                         backgroundColor: 'transparent',
+                        fontFamily: fontData ? '"NotoSansKR"' : 'sans-serif',
                     }}
                 >
                     {/* Card Container */}
@@ -64,7 +90,6 @@ export async function GET(req: NextRequest) {
                             position: 'relative',
                             border: '1px solid #333',
                             boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                            fontFamily: '"NotoSansKR"',
                         }}
                     >
                         {/* Background Watermark Pattern */}
@@ -134,7 +159,7 @@ export async function GET(req: NextRequest) {
                                         )}
                                     </div>
                                 </div>
-                                <div style={{ fontSize: '12px', color: '#6b7280', fontFamily: '"NotoSansKR-Regular"' }}>
+                                <div style={{ fontSize: '12px', color: '#6b7280' }}>
                                     등록번호 ({regNum === '미등록' ? '종합 미등록' : regNum})
                                 </div>
                             </div>
@@ -150,7 +175,7 @@ export async function GET(req: NextRequest) {
                                 border: '1px solid #333',
                                 marginBottom: '20px',
                             }}>
-                                <div style={{ fontSize: '12px', color: '#d1d5db', lineHeight: '1.5', fontFamily: '"NotoSansKR-Regular"' }}>
+                                <div style={{ fontSize: '12px', color: '#d1d5db', lineHeight: '1.5' }}>
                                     &quot;{breed} 믹스일 수도 있고 순종일 수도 있습니다. 사랑스러운 {name}는(은) 세상에서 가장 특별한 반려동물입니다!&quot;
                                 </div>
                             </div>
@@ -165,7 +190,7 @@ export async function GET(req: NextRequest) {
                                     { label: '중성화', value: neuterText },
                                 ].map((item, idx) => (
                                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', borderBottom: '1px solid #333', paddingBottom: '4px' }}>
-                                        <div style={{ color: '#6b7280', fontFamily: '"NotoSansKR-Regular"' }}>{item.label}</div>
+                                        <div style={{ color: '#6b7280' }}>{item.label}</div>
                                         <div style={{ color: 'white', fontWeight: 'bold' }}>{item.value}</div>
                                     </div>
                                 ))}
@@ -189,7 +214,7 @@ export async function GET(req: NextRequest) {
                                     { label: '실내/외', val: 5 },
                                 ].map((stat, idx) => (
                                     <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                                        <div style={{ color: '#888', fontSize: '10px', width: '40px', fontFamily: '"NotoSansKR-Regular"' }}>{stat.label}</div>
+                                        <div style={{ color: '#888', fontSize: '10px', width: '40px' }}>{stat.label}</div>
                                         <div style={{ flex: 1, height: '6px', backgroundColor: '#333', borderRadius: '3px', position: 'relative', overflow: 'hidden', display: 'flex' }}>
                                             {/* Track Segments */}
                                             {[1, 2, 3, 4, 5].map(i => (
@@ -213,24 +238,7 @@ export async function GET(req: NextRequest) {
                     </div>
                 </div>
             ),
-            {
-                width: 420,
-                height: 640,
-                fonts: [
-                    {
-                        name: 'NotoSansKR',
-                        data: fontData,
-                        style: 'normal',
-                        weight: 700,
-                    },
-                    {
-                        name: 'NotoSansKR-Regular',
-                        data: fontDataRegular,
-                        style: 'normal',
-                        weight: 400,
-                    },
-                ],
-            },
+            imageOptions,
         );
     } catch (e: any) {
         console.log(`${e.message}`);
