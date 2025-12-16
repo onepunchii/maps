@@ -407,16 +407,18 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
 
                 {/* Add New Pet Button - Hidden in Edit Mode */}
                 {!isEditMode && (
-                    <button
-                        onClick={() => router.push("/register")}
-                        className="w-full py-4 rounded-2xl border border-dashed border-[#444] text-gray-400 font-bold flex items-center justify-center gap-2 hover:bg-[#222] hover:text-petudy-lime hover:border-petudy-lime/50 transition-all active:scale-[0.99] group shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300 mx-4 mb-8"
-                        onTouchStart={(e) => e.stopPropagation()}
-                    >
-                        <div className="w-5 h-5 rounded-full border border-current flex items-center justify-center group-hover:bg-petudy-lime group-hover:border-petudy-lime group-hover:text-bg-main transition-colors">
-                            <Plus className="w-3 h-3" />
-                        </div>
-                        새로운 아이 등록하기
-                    </button>
+                    <div className="px-4 w-full mb-8 shrink-0">
+                        <button
+                            onClick={() => router.push("/register")}
+                            className="w-full py-4 rounded-2xl border border-dashed border-[#444] text-gray-400 font-bold flex items-center justify-center gap-2 hover:bg-[#222] hover:text-petudy-lime hover:border-petudy-lime/50 transition-all active:scale-[0.99] group animate-in fade-in slide-in-from-bottom-2 duration-300"
+                            onTouchStart={(e) => e.stopPropagation()}
+                        >
+                            <div className="w-5 h-5 rounded-full border border-current flex items-center justify-center group-hover:bg-petudy-lime group-hover:border-petudy-lime group-hover:text-bg-main transition-colors">
+                                <Plus className="w-3 h-3" />
+                            </div>
+                            새로운 아이 등록하기
+                        </button>
+                    </div>
                 )}
             </div>
 
