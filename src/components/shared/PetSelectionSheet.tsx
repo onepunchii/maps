@@ -299,7 +299,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
     if (!shouldRender) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center">
+        <div className="fixed inset-0 z-[9999] flex items-end justify-center">
             {/* ... (backdrop and container preserved) */}
 
             {/* Pet List - Scrollable with Sortable Context */}
@@ -359,7 +359,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
             {/* View Card Modal */}
             {
                 viewingCardPet && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <RegistrationSuccess3D
                             onComplete={() => setViewingCardPet(null)}
                             formData={{
@@ -383,7 +383,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
             {/* Delete Confirmation Modal */}
             {
                 deletingPetId && (
-                    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <div className="bg-[#1E1E20] border border-[#333] p-6 rounded-2xl w-[90%] max-w-[320px] text-center shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
                             <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
                                 <Trash2 className="w-6 h-6" />
