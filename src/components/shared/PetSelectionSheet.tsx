@@ -84,15 +84,23 @@ function SortablePetItem({
         <div
             ref={setNodeRef}
             style={style}
+            onClick={() => !isEditMode && onSelect()} // Allow selection on click
             className={`bg-[#252527] rounded-[24px] p-4 shadow-lg border relative group transition-all touch-manipulation
             ${isSelected && !isEditMode ? 'border-petudy-lime/50 ring-1 ring-petudy-lime/20' : 'border-[#333] hover:border-gray-500'}
-            ${isDragging ? 'opacity-80 scale-105 shadow-2xl bg-[#2D2D30]' : ''}`}
+            ${isDragging ? 'opacity-80 scale-105 shadow-2xl bg-[#2D2D30]' : ''}
+            ${!isEditMode ? 'cursor-pointer hover:bg-[#2a2a2c]' : ''}`} // Add cursor pointer
         >
-            {/* Top Part: Info (Pointer Events None to allow click-through to background) */}
-            <div className="flex items-start justify-between mb-4 relative z-10 pointer-events-none bg-transparent">
+            {/* Top Part: Info (Allow pointer events for Avatar click) */}
+            <div className="flex items-start justify-between mb-4 relative z-10 bg-transparent">
                 <div className="flex items-center gap-4">
-                    {/* Avatar */}
-                    <div className="relative">
+                    {/* Avatar - Click to View Card */}
+                    <div
+                        className="relative cursor-pointer active:scale-95 transition-transform"
+                        onClick={(e) => {
+                            e.stopPropagation(); // Prevent selecting the pet
+                            onViewCard();
+                        }}
+                    >
                         <div className="w-12 h-12 rounded-full bg-[#333] flex-shrink-0 border border-[#444] overflow-hidden relative shadow-md">
                             {pet.photo_url ? (
                                 <img src={pet.photo_url} alt={pet.name} className="w-full h-full object-cover" />
@@ -339,7 +347,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
             {/* View Card Modal */}
             {
                 viewingCardPet && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <RegistrationSuccess3D
                             onComplete={() => setViewingCardPet(null)}
                             formData={{
