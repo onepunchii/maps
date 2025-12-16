@@ -52,7 +52,7 @@ function BookingContent() {
     const allTimeSlots = [...morningSlots, ...afternoonSlots];
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-bg-main text-white">
+        <div className="absolute inset-0 w-full h-full z-50 flex flex-col overflow-hidden bg-bg-main text-white">
             {/* Force background color on html/body to prevent white gap during overscroll */}
             <style jsx global>{`
                 body {
@@ -185,7 +185,7 @@ function BookingContent() {
             </main>
 
             {/* Bottom Button */}
-            <div className="fixed bottom-0 left-0 right-0 p-6 flex justify-center z-20">
+            <div className="absolute bottom-0 w-full p-6 flex justify-center z-20">
                 <div className="w-full max-w-[430px]">
                     <button
                         disabled={!selectedTime}

@@ -77,14 +77,14 @@ export default function RegistrationSuccess3D({ onComplete, formData, viewMode =
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-bg-main flex flex-col items-center justify-center font-sans pb-10 overflow-hidden touch-none h-dvh w-screen">
+        <div className="absolute inset-0 z-50 bg-bg-main flex flex-col items-center justify-center font-sans pb-10 overflow-hidden touch-none h-full w-full">
             {/* Ambient Background Glow */}
             <div className="absolute top-[-20%] left-[-20%] w-[500px] h-[500px] bg-petudy-lime rounded-full blur-[150px] opacity-10 pointer-events-none"></div>
 
             {/* Success Popup (Only in Registration Flow) */}
             {!viewMode && (
                 <div
-                    className={`fixed top-1/4 left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 transform ${showPopup ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-90 pointer-events-none"}`}
+                    className={`absolute top-1/4 left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 transform ${showPopup ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-90 pointer-events-none"}`}
                 >
                     <div className="bg-white/90 backdrop-blur-md px-8 py-4 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] border border-white/20 flex items-center gap-3">
                         <div className="w-8 h-8 bg-petudy-lime rounded-full flex items-center justify-center text-lg shadow-sm animate-bounce">
@@ -135,7 +135,7 @@ export default function RegistrationSuccess3D({ onComplete, formData, viewMode =
             </div>
 
             {/* Bottom Controls */}
-            <div className="fixed bottom-10 left-0 right-0 flex justify-center z-50 px-6 gap-3">
+            <div className="absolute bottom-10 left-0 right-0 flex justify-center z-50 px-6 gap-3">
                 {viewMode ? (
                     <button
                         onClick={onComplete}

@@ -102,7 +102,7 @@ function IntroPageContent() {
     const handleNext = () => {
         if (currentStep < 2) {
             containerRef.current?.scrollTo({
-                left: (currentStep + 1) * window.innerWidth,
+                left: (currentStep + 1) * containerRef.current.offsetWidth,
                 behavior: "smooth"
             });
         } else {
@@ -148,7 +148,7 @@ function IntroPageContent() {
                 {data.steps.map((step, index) => (
                     <div
                         key={index}
-                        className="w-screen h-screen flex-shrink-0 snap-center flex flex-col items-center justify-center relative p-6"
+                        className="w-full h-full flex-shrink-0 snap-center flex flex-col items-center justify-center relative p-6"
                     >
                         {/* Dynamic Background */}
                         <div className={`absolute inset-0 bg-gradient-to-br ${step.bgGradient} opacity-30`} />

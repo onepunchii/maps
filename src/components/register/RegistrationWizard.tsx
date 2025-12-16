@@ -313,7 +313,7 @@ export default function RegistrationWizard({
     };
 
     return (
-        <div className="flex flex-col h-dvh w-screen overflow-hidden bg-bg-main touch-none text-white">
+        <div className="flex flex-col h-full w-full absolute inset-0 bg-bg-main touch-none text-white overflow-hidden">
             {/* Ambient Background Glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-petudy-lime rounded-full blur-[150px] opacity-10 pointer-events-none"></div>
 
@@ -366,7 +366,7 @@ export default function RegistrationWizard({
 
             {/* Bottom Navigation - Hidden when Breed Drawer is Open */}
             <div
-                className={`fixed bottom-0 left-0 right-0 p-4 pb-10 flex justify-center z-50 transition-transform duration-300 ${isBreedDrawerOpen ? "translate-y-full" : "translate-y-0"
+                className={`absolute bottom-0 w-full p-4 pb-10 flex justify-center z-50 transition-transform duration-300 ${isBreedDrawerOpen ? "translate-y-full" : "translate-y-0"
                     }`}
             >
                 <div className="w-full max-w-[430px] flex items-center justify-center gap-3">
