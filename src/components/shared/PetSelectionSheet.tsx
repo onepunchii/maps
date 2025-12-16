@@ -227,7 +227,54 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
         setPets(initialPets);
     }, [initialPets]);
 
-    // ... (rest of effects)
+    // Drag End Handler
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            setPets((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over.id);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    };
+
+    // Delete Handler
+    const handleDelete = async () => {
+        if (!deletingPetId) return;
+        try {
+            await deletePet(deletingPetId);
+            setPets((prev) => prev.filter((p) => p.id !== deletingPetId));
+            setDeletingPetId(null);
+            router.refresh(); // Refresh server components
+        } catch (error) {
+            console.error("Failed to delete pet:", error);
+            alert("반려동물 삭제에 실패했습니다.");
+            setDeletingPetId(null);
+        }
+    };
+
+    // Age Calculation Helper
+    const calculateAge = (birthDateStr: string | null) => {
+        if (!birthDateStr) return "나이 미상";
+        const birthDate = new Date(birthDateStr);
+        if (isNaN(birthDate.getTime())) return "나이 미상";
+
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+
+        // Show months for puppies/kittens under 1 year
+        if (age === 0) {
+            const months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+            return `${Math.max(0, months)}개월`;
+        }
+
+        return `${age}살`;
+    };
 
     if (!shouldRender) return null;
 
