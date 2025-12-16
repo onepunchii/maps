@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { Plus, Check, Pencil, Trash2, IdCard, ArrowUpDown, GripVertical, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Pet, deletePet } from "@/actions/pet";
-import RegistrationSuccess3D from "@/components/register/RegistrationSuccess3D";
 import Link from "next/link";
 import {
     DndContext,
@@ -55,7 +54,6 @@ function SortablePetItem({
     isSelected,
     isEditMode,
     onSelect,
-    onViewCard,
     onDelete,
     calculateAge
 }: {
@@ -64,7 +62,6 @@ function SortablePetItem({
     isSelected: boolean;
     isEditMode: boolean;
     onSelect: () => void;
-    onViewCard: () => void;
     onDelete: () => void;
     calculateAge: (date: string | null) => string;
 }) {
@@ -98,11 +95,7 @@ function SortablePetItem({
                 <div className="flex items-center gap-4">
                     {/* Avatar - Click to View Card */}
                     <div
-                        className="relative cursor-pointer active:scale-95 transition-transform"
-                        onClick={(e) => {
-                            e.stopPropagation(); // Prevent selecting the pet
-                            onViewCard();
-                        }}
+                        className="relative"
                     >
                         <div className="w-12 h-12 rounded-full bg-[#333] flex-shrink-0 border border-[#444] overflow-hidden relative shadow-md">
                             {pet.photo_url ? (
@@ -149,18 +142,7 @@ function SortablePetItem({
                 ) : (
                     /* Standard Actions - Hidden in Edit Mode */
                     <>
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                onViewCard();
-                            }}
-                            className="w-8 h-8 rounded-full bg-[#333] border border-[#444] flex items-center justify-center text-gray-400 hover:text-petudy-lime hover:border-petudy-lime/30 transition-colors active:scale-90"
-                            title="등록증 보기"
-                        >
-                            <IdCard className="w-3.5 h-3.5" />
-                        </button>
+
                         <Link
                             href={`/settings/pets/${pet.id}/edit`}
                             onClick={(e) => e.stopPropagation()}
@@ -214,9 +196,6 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
     const [isEditMode, setIsEditMode] = useState(false); // New Edit Mode State
 
     // View Card Modal State
-    const [viewingCardPet, setViewingCardPet] = useState<Pet | null>(null);
-
-    // Delete Confirmation State
     const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
 
     // Sheet Drag Logic State
@@ -390,7 +369,6 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                                             isSelected={currentPetId === pet.id}
                                             isEditMode={isEditMode}
                                             onSelect={() => { if (!isEditMode) { onSelectPet(pet); onClose(); } }}
-                                            onViewCard={() => setViewingCardPet(pet)}
                                             onDelete={() => setDeletingPetId(pet.id)}
                                             calculateAge={calculateAge}
                                         />
@@ -422,29 +400,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                 )}
             </div>
 
-            {/* View Card Modal */}
-            {
-                viewingCardPet && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
-                        <RegistrationSuccess3D
-                            onComplete={() => setViewingCardPet(null)}
-                            formData={{
-                                name: viewingCardPet.name,
-                                breed: viewingCardPet.breed || "믹스",
-                                birth: viewingCardPet.birth_date && !isNaN(new Date(viewingCardPet.birth_date).getTime())
-                                    ? new Date(viewingCardPet.birth_date)
-                                    : undefined,
-                                photo: viewingCardPet.photo_url,
-                                gender: viewingCardPet.gender,
-                                registrationNumber: viewingCardPet.registration_number || `REG-${viewingCardPet.id.slice(0, 8)}`,
-                                species: viewingCardPet.species || "dog",
-                                neuter: viewingCardPet.neuter || false
-                            }}
-                            viewMode={true}
-                        />
-                    </div>
-                )
-            }
+
 
             {/* Delete Confirmation Modal */}
             {

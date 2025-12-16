@@ -113,7 +113,7 @@ export default function RegistrationSuccess3D({ onComplete, formData, viewMode =
 
             {/* Pass Card Container (3D Swing) */}
             <div
-                className={`relative z-30 -mt-8 w-[380px] bg-transparent flex flex-col origin-top ${!viewMode ? "animate-swing" : ""}`}
+                className="relative z-30 -mt-8 w-[380px] bg-transparent flex flex-col origin-top"
             >
                 {/* Generated Image */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
