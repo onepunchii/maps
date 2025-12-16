@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChevronLeft, Plus, Pencil, ArrowUpDown, IdCard } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import RegistrationSuccess3D from "../register/RegistrationSuccess3D";
 import { Pet } from "@/actions/pet";
@@ -123,12 +124,12 @@ export default function PetSettingsPage({ initialPets }: PetSettingsPageProps) {
                                             <IdCard className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                                         </button>
                                         {/* Edit Button */}
-                                        <button
-                                            onClick={() => router.push(`/settings/pets/${pet.id}/edit`)}
+                                        <Link
+                                            href={`/settings/pets/${pet.id}/edit`}
                                             className="w-9 h-9 rounded-full bg-[#222] border border-[#333] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#333] transition-colors"
                                         >
                                             <Pencil className="w-4 h-4" />
-                                        </button>
+                                        </Link>
                                     </div>
                                 </div>
 
@@ -158,7 +159,7 @@ export default function PetSettingsPage({ initialPets }: PetSettingsPageProps) {
 
             {/* Registration Card Modal Overlay */}
             {viewingCardPet && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
                     <RegistrationSuccess3D
                         onComplete={() => setViewingCardPet(null)}
                         formData={{
@@ -173,13 +174,6 @@ export default function PetSettingsPage({ initialPets }: PetSettingsPageProps) {
                         }}
                         viewMode={true}
                     />
-                    {/* Close Button Override (Optional if RegistrationSuccess doesn't have a close for 'onComplete' correctly mapped) */}
-                    {/* Actually RegistrationSuccess3D usually has a 'Home' button that calls onComplete.
-                        But to be safe/UX friendly, maybe a close button outside?
-                        RegistrationSuccess3D is usually full screen. Let's see.
-                        It has `fixed inset-0`. So it will cover everything.
-                        onComplete is passed to it. Let's assume it calls onComplete when done.
-                    */}
                 </div>
             )}
         </div>
