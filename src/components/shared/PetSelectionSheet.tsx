@@ -235,6 +235,18 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
         setPets(initialPets);
     }, [initialPets]);
 
+    // Handle Open/Close Animation
+    useEffect(() => {
+        if (isOpen) {
+            setShouldRender(true);
+            requestAnimationFrame(() => setIsVisible(true));
+        } else {
+            setIsVisible(false);
+            const timer = setTimeout(() => setShouldRender(false), 300); // 300ms transition
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen]);
+
     // Drag End Handler
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
