@@ -97,10 +97,29 @@ export default function RegistrationWizard({ onComplete, initialData, isEditMode
     // Server Action Import (Dynamic import to avoid build issues if server actions behave weirdly in client components during dev, but standard import is fine usually. using standard at top level)
     // import { createPet } from "@/actions/pet"; -> Needs to be added to top imports
 
+    const [photoFile, setPhotoFile] = useState<File | null>(null);
+
     const handleNext = async () => {
         if (isLastStep) {
             setIsSubmitting(true);
             try {
+                let finalPhotoUrl = formData.photo;
+
+                // Handle Photo Upload if a new file was selected
+                if (photoFile) {
+                    const photoFormData = new FormData();
+                    photoFormData.append("file", photoFile);
+
+                    // Dynamic import for upload action
+                    const { uploadPetPhoto } = await import("@/actions/storage");
+                    const uploadRes = await uploadPetPhoto(photoFormData);
+
+                    if (!uploadRes.success || !uploadRes.url) {
+                        throw new Error(uploadRes.error || "Image upload failed");
+                    }
+                    finalPhotoUrl = uploadRes.url;
+                }
+
                 // Prepare data for Server Action
                 const payload = {
                     name: formData.name,
@@ -112,7 +131,7 @@ export default function RegistrationWizard({ onComplete, initialData, isEditMode
                     weight: formData.weight || null,
                     color: formData.color || null,
                     concern: formData.concern || [],
-                    photo: formData.photo || null, // Allow photo to be passed if it exists
+                    photo: finalPhotoUrl || null,
                     reg_number: formData.reg_number || null,
                     adoptionDate: formData.adoptionDate || null,
                 };
@@ -129,7 +148,7 @@ export default function RegistrationWizard({ onComplete, initialData, isEditMode
                 setIsCompleted(true);
             } catch (error) {
                 console.error("Registration/Update failed:", error);
-                alert("처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
+                alert("처리 중 오류가 발생했습니다: " + (error as Error).message);
             } finally {
                 setIsSubmitting(false);
             }
@@ -170,6 +189,7 @@ export default function RegistrationWizard({ onComplete, initialData, isEditMode
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setPhotoFile(file); // Store file for upload
             const imageUrl = URL.createObjectURL(file);
             setFormData(prev => ({ ...prev, [currentStep.id]: imageUrl }));
         }
