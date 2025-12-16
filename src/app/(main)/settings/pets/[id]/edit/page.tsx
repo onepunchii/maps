@@ -1,46 +1,48 @@
 import { getPet } from "@/actions/pet";
 import RegistrationWizard from "@/components/register/RegistrationWizard";
-import { redirect } from "next/navigation";
+import { MoveLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 
-export default async function EditPetPage({ params }: { params: { id: string } }) {
-    const pet = await getPet(params.id);
+interface EditPetPageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default async function EditPetPage({ params }: EditPetPageProps) {
+    const { id } = await params;
+    const pet = await getPet(id);
 
     if (!pet) {
-        redirect("/settings/pets");
+        notFound();
     }
 
-    // Transform Pet to PetFormData
-    // Note: Some fields like weight, color, adoptionDate might be missing in 'Pet' interface but exist in DB. 
-    // For now, mapping what we have in 'Pet' interface.
-    // Ideally 'getPet' should return full DB fields if we want to edit them all.
-    // Assuming 'Pet' interface in actions/pet.ts is limited for display.
-    // For editing, we might need a fuller object or just accept what's there.
-    // Let's rely on what we have.
-
-    const initialData = {
-        name: pet.name,
-        species: pet.species,
-        breed: pet.breed,
-        gender: pet.gender,
-        neuter: pet.neuter ? "yes" : "no",
-        birth: pet.birth_date,
-        concern: pet.concerns,
-        photo: pet.photo_url,
-        reg_number: pet.registration_number,
-        weight: pet.weight,
-        color: pet.color,
-        adoptionDate: pet.adoption_date
-    };
-
     return (
-        <div className="min-h-screen bg-black">
-            {/* We can reuse the wizard or wrap it. 
-                 The wizard has its own layout/header, so we just render it. 
-             */}
+        <div className="min-h-screen bg-bg-main pb-24">
+            {/* Header */}
+            <div className="relative flex items-center justify-center h-[52px] bg-bg-main sticky top-0 z-50">
+                <Link
+                    href="/"
+                    className="absolute left-4 w-6 h-6 flex items-center justify-center"
+                >
+                    <MoveLeft className="w-5 h-5 text-white" />
+                </Link>
+                <h1 className="text-base font-bold text-white">반려가족 수정</h1>
+            </div>
+
             <RegistrationWizard
-                initialData={initialData}
                 isEditMode={true}
-                petId={pet.id}
+                petId={id}
+                initialData={{
+                    name: pet.name,
+                    species: pet.species,
+                    breed: pet.breed,
+                    gender: pet.gender,
+                    birth: pet.birth_date ? new Date(pet.birth_date) : undefined,
+                    weight: pet.weight, // Need to verify if getPet returns weight. It likely matches Pet interface.
+                    color: pet.color,   // Same for color
+                    concern: pet.concerns,
+                    photo: pet.photo_url
+                }}
             />
         </div>
     );

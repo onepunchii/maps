@@ -37,6 +37,15 @@ export async function uploadPetPhoto(formData: FormData) {
         return { success: true, url: publicUrl };
     } catch (error) {
         console.error("Upload action failed:", error);
-        return { success: false, error: (error as Error).message };
+        const errMsg = (error as Error).message;
+
+        if (errMsg.includes("Bucket not found")) {
+            return {
+                success: false,
+                error: "이미지 저장소(Bucket)를 찾을 수 없습니다. Supabase 관리자 페이지에서 'pet-photos'라는 이름의 공개(Public) 버킷을 생성해주세요."
+            };
+        }
+
+        return { success: false, error: errMsg };
     }
 }

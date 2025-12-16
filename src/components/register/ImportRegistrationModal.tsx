@@ -13,7 +13,7 @@ interface ImportRegistrationModalProps {
         species?: "dog" | "cat";
         breed?: string;
         gender?: "male" | "female";
-        neuter?: "yes" | "no";
+        neuter?: boolean | null;
         org?: string;
     }) => void;
 }
@@ -61,7 +61,7 @@ export default function ImportRegistrationModal({ isOpen, onClose, onImport }: I
                 species: petData.kindNm?.includes("고양이") ? "cat" : "dog", // Simple heuristic
                 breed: petData.kindNm?.replace("[개] ", "").replace("[고양이] ", ""),
                 gender: petData.sexNm === "암컷" ? "female" : "male",
-                neuter: petData.neuterYn === "중성" ? "yes" : "no",
+                neuter: petData.neuterYn === "중성" ? true : false,
                 org: petData.orgNm
             });
 

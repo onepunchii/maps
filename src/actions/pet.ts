@@ -70,7 +70,7 @@ export interface PetFormData {
     species: "dog" | "cat";
     breed: string | null;
     gender: "male" | "female";
-    neuter: "yes" | "no";
+    neuter: boolean | null;
     birth: string | null; // "YYYY-MM-DD"
     weight: string | null;
     color: string | null;
@@ -96,14 +96,15 @@ export async function createPet(formData: PetFormData) {
         // Gender: male -> MALE
         const dbGender = formData.gender === "female" ? "FEMALE" : "MALE";
 
-        // Neutered: yes -> Y, no -> N
-        const dbNeutered = formData.neuter === "yes" ? "Y" : "N";
+        // Neutered: boolean -> Y/N
+        const dbNeutered = formData.neuter === true ? "Y" : "N";
 
         // Reg Status: has reg_number ? Y : N
         const dbRegStatus = formData.reg_number ? "Y" : "N";
 
         // Insert into DB
-        await supabase.from("pets").insert({
+        // Insert into DB
+        const { error } = await supabase.from("pets").insert({
             user_id: user.id,
             pet_name: formData.name,
             species: dbSpecies,
@@ -119,6 +120,11 @@ export async function createPet(formData: PetFormData) {
             reg_status: dbRegStatus,
             reg_num: formData.reg_number
         });
+
+        if (error) {
+            console.error("Supabase insert error:", error);
+            throw new Error(error.message || "Failed to create pet record");
+        }
 
         // Revalidate paths to update UI
         revalidatePath("/");
@@ -185,7 +191,7 @@ export async function updatePet(petId: string, formData: PetFormData) {
 
         const dbSpecies = formData.species === "cat" ? "CAT" : "DOG";
         const dbGender = formData.gender === "female" ? "FEMALE" : "MALE";
-        const dbNeutered = formData.neuter === "yes" ? "Y" : "N";
+        const dbNeutered = formData.neuter === true ? "Y" : "N";
         const dbRegStatus = formData.reg_number ? "Y" : "N";
 
         const { error } = await supabase
@@ -215,8 +221,34 @@ export async function updatePet(petId: string, formData: PetFormData) {
         revalidatePath(`/settings/pets/${petId}/edit`);
 
         return { success: true };
+        return { success: true };
     } catch (error) {
         console.error("Failed to update pet:", error);
+        throw error;
+    }
+}
+
+export async function deletePet(petId: string) {
+    try {
+        const supabase = await createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) throw new Error("Unauthorized");
+
+        const { error } = await supabase
+            .from("pets")
+            .delete()
+            .eq("id", petId)
+            .eq("user_id", user.id);
+
+        if (error) throw error;
+
+        revalidatePath("/");
+        revalidatePath("/mypage");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to delete pet:", error);
         throw error;
     }
 }
