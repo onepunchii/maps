@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Plus, Check, Pencil, Trash2, IdCard, ArrowUpDown, GripVertical, Star } from "lucide-react";
@@ -248,6 +250,29 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
         }
     }, [isOpen]);
 
+    // Sheet Drag Handlers
+    const handleDragStart = (e: React.PointerEvent) => {
+        setIsSheetDragging(true);
+        startY.current = e.clientY;
+    };
+
+    const handleDragMove = (e: React.PointerEvent) => {
+        if (!isSheetDragging) return;
+        const currentY = e.clientY;
+        const diff = currentY - startY.current;
+        if (diff > 0) {
+            setDragOffset(diff);
+        }
+    };
+
+    const handleDragEndSheet = () => {
+        setIsSheetDragging(false);
+        if (dragOffset > 150) {
+            onClose();
+        }
+        setDragOffset(0);
+    };
+
     // Drag End Handler
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -454,4 +479,3 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
         document.body
     );
 }
-```
