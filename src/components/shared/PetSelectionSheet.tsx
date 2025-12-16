@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Check, Pencil, Trash2, IdCard, ArrowUpDown, GripVertical, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Pet, deletePet } from "@/actions/pet";
@@ -296,15 +297,55 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
         return `${age}살`;
     };
 
-    if (!shouldRender) return null;
+    if (!shouldRender || !isMounted) return null;
 
-    return (
-        <div className="fixed inset-0 z-[9999] flex items-end justify-center">
-            {/* ... (backdrop and container preserved) */}
+    return createPortal(
+        <div className="fixed inset-0 z-[60] flex items-end justify-center pointer-events-auto">
+            {/* Backdrop */}
+            <div
+                className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                onClick={onClose}
+            />
 
-            {/* Pet List - Scrollable with Sortable Context */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar mb-6 p-2 mx-4" onTouchStart={(e) => e.stopPropagation()}>
-                {isMounted ? (
+            {/* Sheet Container */}
+            <div
+                className={`w-full max-w-[512px] bg-[#1c1c1e] rounded-t-[32px] pt-4 flex flex-col max-h-[85vh] shadow-[0_-10px_40px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-out z-[70]
+                ${isVisible ? "translate-y-0" : "translate-y-full"}`}
+                style={{
+                    transform: isSheetDragging ? `translateY(${dragOffset}px)` : isVisible ? "translateY(0)" : "translateY(100%)",
+                    transition: isSheetDragging ? 'none' : 'transform 0.3s ease-out'
+                }}
+            >
+                {/* Drag Handle Area */}
+                <div
+                    className="w-full flex justify-center py-3 touch-none cursor-grab active:cursor-grabbing"
+                    onPointerDown={handleDragStart}
+                    onPointerMove={handleDragMove}
+                    onPointerUp={handleDragEndSheet}
+                    onPointerCancel={handleDragEndSheet}
+                >
+                    <div className="w-10 h-1 rounded-full bg-gray-600/50" />
+                </div>
+
+                {/* Header */}
+                <div className="px-6 pb-4 flex justify-between items-center bg-[#1c1c1e] z-10 sticky top-0">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        반려동물 선택
+                        <span className="text-petudy-lime text-sm font-normal">({pets.length})</span>
+                    </h2>
+                    <button
+                        onClick={() => setIsEditMode(!isEditMode)}
+                        className={`text-sm px-3 py-1.5 rounded-full border transition-all ${isEditMode
+                            ? "bg-petudy-lime text-bg-main border-petudy-lime font-bold"
+                            : "text-gray-400 border-gray-600 hover:text-white hover:border-white"
+                            }`}
+                    >
+                        {isEditMode ? "완료" : "편집"}
+                    </button>
+                </div>
+
+                {/* Pet List - Scrollable with Sortable Context */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar mb-6 p-2 mx-4" onTouchStart={(e) => e.stopPropagation()}>
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
@@ -319,7 +360,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                                     pets.map((pet, index) => (
                                         <SortablePetItem
                                             key={pet.id}
-                                            pet={pet} // ... props
+                                            pet={pet}
                                             index={index}
                                             isSelected={currentPetId === pet.id}
                                             isEditMode={isEditMode}
@@ -337,29 +378,27 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                             </div>
                         </SortableContext>
                     </DndContext>
-                ) : null}
-            </div>
-            {/* ... */}
+                </div>
 
-            {/* Add New Pet Button - Hidden in Edit Mode */}
-            {!isEditMode && (
-                <button
-                    onClick={() => router.push("/register")}
-                    className="w-full py-4 rounded-2xl border border-dashed border-[#444] text-gray-400 font-bold flex items-center justify-center gap-2 hover:bg-[#222] hover:text-petudy-lime hover:border-petudy-lime/50 transition-all active:scale-[0.99] group shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300"
-                    onTouchStart={(e) => e.stopPropagation()}
-                >
-                    <div className="w-5 h-5 rounded-full border border-current flex items-center justify-center group-hover:bg-petudy-lime group-hover:border-petudy-lime group-hover:text-bg-main transition-colors">
-                        <Plus className="w-3 h-3" />
-                    </div>
-                    새로운 아이 등록하기
-                </button>
-            )}
-            {/* Button Container End (Implicit) */}
+                {/* Add New Pet Button - Hidden in Edit Mode */}
+                {!isEditMode && (
+                    <button
+                        onClick={() => router.push("/register")}
+                        className="w-full py-4 rounded-2xl border border-dashed border-[#444] text-gray-400 font-bold flex items-center justify-center gap-2 hover:bg-[#222] hover:text-petudy-lime hover:border-petudy-lime/50 transition-all active:scale-[0.99] group shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300 mx-4 mb-8"
+                        onTouchStart={(e) => e.stopPropagation()}
+                    >
+                        <div className="w-5 h-5 rounded-full border border-current flex items-center justify-center group-hover:bg-petudy-lime group-hover:border-petudy-lime group-hover:text-bg-main transition-colors">
+                            <Plus className="w-3 h-3" />
+                        </div>
+                        새로운 아이 등록하기
+                    </button>
+                )}
+            </div>
 
             {/* View Card Modal */}
             {
                 viewingCardPet && (
-                    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <RegistrationSuccess3D
                             onComplete={() => setViewingCardPet(null)}
                             formData={{
@@ -383,7 +422,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
             {/* Delete Confirmation Modal */}
             {
                 deletingPetId && (
-                    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
                         <div className="bg-[#1E1E20] border border-[#333] p-6 rounded-2xl w-[90%] max-w-[320px] text-center shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
                             <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
                                 <Trash2 className="w-6 h-6" />
@@ -411,6 +450,8 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                     </div>
                 )
             }
-        </div >
+        </div>,
+        document.body
     );
 }
+```
