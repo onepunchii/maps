@@ -43,6 +43,12 @@ export default function RegistrationSuccess3D({ onComplete, formData, viewMode =
         params.append("breed", formData.breed || "품종 미상");
         params.append("regNum", formData.registrationNumber || "미등록");
 
+        if (formData.birth) params.append("birth", formData.birth.toString());
+        if (formData.gender) params.append("gender", formData.gender);
+        if (formData.neuter !== undefined) params.append("neuter", formData.neuter ? "true" : "false");
+        if (formData.color) params.append("color", formData.color);
+        if (formData.species) params.append("species", formData.species);
+
         // Handle Photo URL
         // If it's a File (shouldn't be in this new flow), we can't pass it.
         // If it's a string, pass it.
