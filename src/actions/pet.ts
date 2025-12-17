@@ -32,7 +32,7 @@ export async function getPet(petId: string) {
         const { data, error } = await supabase
             .from("pets")
             .select("*")
-            .eq("id", petId)
+            .eq("pet_id", petId)
             .eq("user_id", user.id)
             .single();
 
@@ -103,8 +103,7 @@ export async function createPet(formData: PetFormData) {
         const dbRegStatus = formData.reg_number ? "Y" : "N";
 
         // Insert into DB
-        // Insert into DB
-        const { error } = await supabase.from("pets").insert({
+        const { data: newPet, error } = await supabase.from("pets").insert({
             user_id: user.id,
             pet_name: formData.name,
             species: dbSpecies,
@@ -119,7 +118,9 @@ export async function createPet(formData: PetFormData) {
             profile_photo_url: formData.photo,
             reg_status: dbRegStatus,
             reg_num: formData.reg_number
-        });
+        })
+            .select()
+            .single();
 
         if (error) {
             console.error("Supabase insert error:", error);
@@ -130,7 +131,7 @@ export async function createPet(formData: PetFormData) {
         revalidatePath("/");
         revalidatePath("/mypage");
 
-        return { success: true };
+        return { success: true, petId: newPet.pet_id };
     } catch (error) {
         console.error("Failed to create pet:", error);
         throw error;
@@ -160,7 +161,7 @@ export async function getPets() {
 
 
         return data.map((pet: any) => ({
-            id: pet.id,
+            id: pet.pet_id,
             name: pet.pet_name,
             photo_url: pet.profile_photo_url,
             gender: pet.gender === "MALE" ? "male" : "female",
@@ -211,7 +212,7 @@ export async function updatePet(petId: string, formData: PetFormData) {
                 reg_status: dbRegStatus,
                 reg_num: formData.reg_number
             })
-            .eq("id", petId)
+            .eq("pet_id", petId)
             .eq("user_id", user.id);
 
         if (error) throw error;
@@ -220,7 +221,6 @@ export async function updatePet(petId: string, formData: PetFormData) {
         revalidatePath("/mypage");
         revalidatePath(`/settings/pets/${petId}/edit`);
 
-        return { success: true };
         return { success: true };
     } catch (error) {
         console.error("Failed to update pet:", error);
@@ -238,7 +238,7 @@ export async function deletePet(petId: string) {
         const { error } = await supabase
             .from("pets")
             .delete()
-            .eq("id", petId)
+            .eq("pet_id", petId)
             .eq("user_id", user.id);
 
         if (error) throw error;

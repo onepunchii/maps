@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Plus, Check, Pencil, Trash2, IdCard, ArrowUpDown, GripVertical, Star } from "lucide-react";
+import { Plus, Check, Pencil, Trash2, IdCard, ArrowUpDown, GripVertical, Star, X, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Pet, deletePet } from "@/actions/pet";
+import { Pet, deletePet, PetFormData } from "@/actions/pet";
 import Link from "next/link";
+import RegistrationSuccess3D from "@/components/register/RegistrationSuccess3D";
 import {
     DndContext,
     closestCenter,
@@ -55,7 +56,8 @@ function SortablePetItem({
     isEditMode,
     onSelect,
     onDelete,
-    calculateAge
+    calculateAge,
+    onViewPass // Add prop
 }: {
     pet: Pet;
     index: number;
@@ -64,6 +66,7 @@ function SortablePetItem({
     onSelect: () => void;
     onDelete: () => void;
     calculateAge: (date: string | null) => string;
+    onViewPass: (pet: Pet) => void; // Add type
 }) {
     const {
         attributes,
@@ -142,6 +145,19 @@ function SortablePetItem({
                 ) : (
                     /* Standard Actions - Hidden in Edit Mode */
                     <>
+                        {/* Pet Pass Button */}
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onViewPass(pet);
+                            }}
+                            className="w-8 h-8 rounded-full bg-[#333] border border-[#444] flex items-center justify-center text-gray-400 hover:text-petudy-lime hover:border-petudy-lime/30 transition-colors active:scale-90"
+                            title="펫 패스 보기"
+                        >
+                            <IdCard className="w-4 h-4" />
+                        </button>
 
                         <Link
                             href={`/settings/pets/${pet.id}/edit`}
@@ -197,6 +213,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
 
     // View Card Modal State
     const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
+    const [viewingPet, setViewingPet] = useState<Pet | null>(null);
 
     // Sheet Drag Logic State
     const [dragOffset, setDragOffset] = useState(0);
@@ -279,6 +296,26 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
         }
     };
 
+    // Helper to convert Pet to FormData for Pass Card
+    const getPetPassFormData = (pet: Pet): any => {
+        return {
+            name: pet.name,
+            species: (pet.species === "cat" ? "cat" : "dog") as "cat" | "dog",
+            breed: pet.breed,
+            gender: pet.gender,
+            neuter: pet.neuter,
+            birth: pet.birth_date,
+            weight: pet.weight,
+            color: pet.color,
+            concern: pet.concerns,
+            photo: pet.photo_url,
+            reg_number: pet.registration_number,
+            adoptionDate: pet.adoption_date,
+            petId: pet.id,
+            ownerName: "소유자",
+        };
+    };
+
     // Age Calculation Helper
     const calculateAge = (birthDateStr: string | null) => {
         if (!birthDateStr) return "나이 미상";
@@ -307,17 +344,16 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
         <div className="fixed inset-0 z-[60] flex items-end justify-center pointer-events-auto">
             {/* Backdrop */}
             <div
-                className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ease-in-out ${isVisible ? "opacity-100" : "opacity-0"}`}
                 onClick={onClose}
             />
 
             {/* Sheet Container */}
             <div
-                className={`w-full max-w-[512px] bg-[#1c1c1e] rounded-t-[32px] pt-4 flex flex-col max-h-[85vh] shadow-[0_-10px_40px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-out z-[70]
-                ${isVisible ? "translate-y-0" : "translate-y-full"}`}
+                className={`w-full max-w-[512px] bg-[#1c1c1e] rounded-t-[32px] pt-4 flex flex-col max-h-[85vh] shadow-[0_-10px_40px_rgba(0,0,0,0.6)] z-[70]`}
                 style={{
                     transform: isSheetDragging ? `translateY(${dragOffset}px)` : isVisible ? "translateY(0)" : "translateY(100%)",
-                    transition: isSheetDragging ? 'none' : 'transform 0.3s ease-out'
+                    transition: isSheetDragging ? 'none' : 'transform 0.5s cubic-bezier(0.32, 0.72, 0, 1)'
                 }}
             >
                 {/* Drag Handle Area */}
@@ -344,7 +380,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                             : "text-gray-400 border-gray-600 hover:text-white hover:border-white"
                             }`}
                     >
-                        {isEditMode ? "완료" : "편집"}
+                        {isEditMode ? "완료" : "순서 바꾸기"}
                     </button>
                 </div>
 
@@ -371,6 +407,7 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                                             onSelect={() => { if (!isEditMode) { onSelectPet(pet); onClose(); } }}
                                             onDelete={() => setDeletingPetId(pet.id)}
                                             calculateAge={calculateAge}
+                                            onViewPass={setViewingPet} // Pass handler
                                         />
                                     ))
                                 ) : (
@@ -399,8 +436,6 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                     </div>
                 )}
             </div>
-
-
 
             {/* Delete Confirmation Modal */}
             {
@@ -433,6 +468,18 @@ export default function PetSelectionSheet({ isOpen, onClose, currentPetId, pets:
                     </div>
                 )
             }
+
+            {/* Pet Pass Viewer Modal */}
+            {viewingPet && (
+                <div className="fixed inset-0 z-[100] bg-bg-main animate-in fade-in duration-300">
+                    <RegistrationSuccess3D
+                        formData={getPetPassFormData(viewingPet)}
+                        petId={viewingPet.id}
+                        onComplete={() => setViewingPet(null)}
+                        viewMode={true}
+                    />
+                </div>
+            )}
         </div>,
         document.body
     );

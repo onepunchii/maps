@@ -60,6 +60,7 @@ export default function RegistrationWizard({
         concern: []
     });
     const [photoFile, setPhotoFile] = useState<File | null>(null);
+    const [createdPetId, setCreatedPetId] = useState<string | null>(null);
 
     // Modals
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -205,7 +206,10 @@ export default function RegistrationWizard({
             if (isEditMode && petId) {
                 await updatePet(petId, payload as any);
             } else {
-                await createPet(payload as any);
+                const result = await createPet(payload as any);
+                if (result && result.petId) {
+                    setCreatedPetId(result.petId);
+                }
             }
 
             // Update local state with the uploaded photo URL so the Success Screen can use it for OG generation
@@ -248,6 +252,7 @@ export default function RegistrationWizard({
             <RegistrationSuccess3D
                 onComplete={() => router.push("/")}
                 formData={formData as any}
+                petId={createdPetId || petId}
             />
         );
     }
