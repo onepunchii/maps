@@ -16,6 +16,9 @@ export const viewport: Viewport = {
 
 import QueryProvider from "@/components/providers/QueryProvider";
 
+import CompanyIntroSidebar from "@/components/layout/sidebars/CompanyIntroSidebar";
+import ServiceBannerSidebar from "@/components/layout/sidebars/ServiceBannerSidebar";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -31,26 +34,16 @@ export default function RootLayout({
                         {/* Desktop/Fold Layout Wrapper */}
                         <div className="relative flex w-full h-full justify-center">
 
-                            {/* Left Banner Placeholder (Hidden on mobile, Visible on Desktop) */}
-                            <aside className="hidden lg:flex flex-col justify-center items-end w-full max-w-[calc(50%-256px)] h-full fixed left-0 top-0 p-8 z-0">
-                                {/* Placeholder Content for Left Banner */}
-                                <div className="text-zinc-700 font-bold text-4xl opacity-20 select-none">
-                                    PETUDY
-                                </div>
-                            </aside>
+                            {/* Left Banner (Company Info) */}
+                            <CompanyIntroSidebar />
 
                             {/* Mobile Container (Centered) */}
                             <main className="w-full max-w-[512px] bg-bg-main h-[100dvh] shadow-2xl relative overflow-y-auto overflow-x-hidden border-x border-[#121212] z-10 scrollbar-hide">
                                 {children}
                             </main>
 
-                            {/* Right Banner Placeholder (Hidden on mobile, Visible on Desktop) */}
-                            <aside className="hidden lg:flex flex-col justify-center items-start w-full max-w-[calc(50%-256px)] h-full fixed right-0 top-0 p-8 z-0">
-                                {/* Placeholder Content for Right Banner */}
-                                <div className="text-zinc-700 font-bold text-4xl opacity-20 select-none">
-                                    2.0
-                                </div>
-                            </aside>
+                            {/* Right Banner (Service/Franchise) */}
+                            <ServiceBannerSidebar />
                         </div>
                     </AuthProvider>
                 </QueryProvider>
