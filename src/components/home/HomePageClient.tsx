@@ -1,5 +1,6 @@
 "use client";
 
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -39,7 +40,7 @@ export default function HomePageClient() {
     // Services Definition
     interface ServiceItem {
         title: string;
-        icon: string;
+        icon: string | React.ReactNode;
         href: string;
         isVertical?: boolean;
         isBanner?: boolean;
@@ -51,7 +52,21 @@ export default function HomePageClient() {
         { title: "미용 예약", icon: "✂️", href: "/intro?category=BATH" },
         { title: "펫장례", icon: "🕊️", href: "/intro?category=FUNERAL", isVertical: true },
         { title: "건강검진", icon: "🩺", href: "/intro?category=CHECKUP" },
-        { title: "펫터디 AI 상담사", icon: "🤖", href: "/consult", isBanner: true, isAi: true }, // AI Counselor Banner
+        {
+            title: "펫터디 AI 상담사",
+            icon: (
+                <div className="w-full h-full transform scale-150">
+                    <DotLottieReact
+                        src="https://lottie.host/fbd4eadc-be4a-44a3-adfb-0630b5bf1647/tBSDMcctNr.lottie"
+                        loop
+                        autoplay
+                    />
+                </div>
+            ),
+            href: "/consult",
+            isBanner: true,
+            isAi: true
+        }, // AI Counselor Banner
         { title: "펫터디 멤버십", icon: "👑", href: "/membership", isBanner: true }, // Landing Banner
         { title: "펫보험", icon: "🛡️", href: "/life/insurance" },
         { title: "펫상조", icon: "🌺", href: "/life/sangjo" },
