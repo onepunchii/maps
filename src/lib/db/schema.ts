@@ -241,3 +241,66 @@ export const commentsRelations = relations(comments, ({ one }) => ({
         references: [users.id],
     }),
 }));
+
+// ====================================================================
+// NEW: Pet Pick (Balance Game)
+// ====================================================================
+
+// 1. 투표(Poll) 테이블
+export const polls = pgTable("polls", {
+    id: serial("id").primaryKey(),
+    creatorId: uuid("creator_id").references(() => users.id), // 만든 사람 (Admin 등)
+    title: text("title").notNull(), // 질문 (예: "다음 상품은?")
+    pollType: text("poll_type").default('VS_IMAGE').notNull(), // 'VS_IMAGE', 'MULTIPLE_CHOICE'
+    status: text("status").default('OPEN').notNull(), // 'OPEN', 'CLOSED'
+    createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 2. 투표 선택지(Poll Options) 테이블
+export const pollOptions = pgTable("poll_options", {
+    id: serial("id").primaryKey(),
+    pollId: integer("poll_id").references(() => polls.id).notNull(),
+    optionText: text("option_text").notNull(), // "A. 다이슨"
+    imageUrl: text("image_url"), // 이미지 (있을 경우)
+    voteCount: integer("vote_count").default(0), // 단순 집계용 (실시간성은 Redis 권장하나 초기엔 DB로)
+});
+
+// 3. 투표 참여 기록(Poll Votes) - 중복 방지
+export const pollVotes = pgTable("poll_votes", {
+    id: serial("id").primaryKey(),
+    pollId: integer("poll_id").references(() => polls.id).notNull(),
+    optionId: integer("option_id").references(() => pollOptions.id).notNull(),
+    userId: uuid("user_id").references(() => users.id).notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+}, (t) => ({
+    unq: unique().on(t.pollId, t.userId), // 한 투표당 한 번만 참여 가능
+}));
+
+// Relations for Polls
+export const pollsRelations = relations(polls, ({ many }) => ({
+    options: many(pollOptions),
+    votes: many(pollVotes),
+}));
+
+export const pollOptionsRelations = relations(pollOptions, ({ one, many }) => ({
+    poll: one(polls, {
+        fields: [pollOptions.pollId],
+        references: [polls.id],
+    }),
+    votes: many(pollVotes),
+}));
+
+export const pollVotesRelations = relations(pollVotes, ({ one }) => ({
+    poll: one(polls, {
+        fields: [pollVotes.pollId],
+        references: [polls.id],
+    }),
+    option: one(pollOptions, {
+        fields: [pollVotes.optionId],
+        references: [pollOptions.id],
+    }),
+    user: one(users, {
+        fields: [pollVotes.userId],
+        references: [users.id],
+    }),
+}));

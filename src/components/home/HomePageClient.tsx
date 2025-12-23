@@ -8,8 +8,14 @@ import { User, Plus } from "lucide-react";
 import PetSelectionSheet from "@/components/shared/PetSelectionSheet";
 import { Pet } from "@/actions/pet";
 import { usePets } from "@/hooks/usePets";
+import PetPickWidget from "./PetPickWidget";
+import { Poll } from "@/actions/poll";
 
-export default function HomePageClient() {
+interface HomePageClientProps {
+    initialPoll?: Poll | null;
+}
+
+export default function HomePageClient({ initialPoll }: HomePageClientProps) {
     const { data: initialPets = [] } = usePets();
     const [currentPet, setCurrentPet] = useState<Pet | null>(null);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -196,6 +202,11 @@ export default function HomePageClient() {
                         </div>
                     </Link>
                 ))}
+            </div>
+
+            {/* Pet Pick Voting Widget */}
+            <div className="mt-6 z-10">
+                <PetPickWidget initialPoll={initialPoll || null} />
             </div>
 
             <PetSelectionSheet
