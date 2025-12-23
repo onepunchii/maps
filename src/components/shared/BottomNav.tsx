@@ -59,11 +59,11 @@ export function BottomNav() {
             {/* 1. Mobile Bottom Bar (Hidden on Large Screens) */}
             <nav
                 className={cn(
-                    "lg:hidden fixed bottom-6 left-6 right-6 z-50 bg-bg-card/90 backdrop-blur-md rounded-3xl border border-[#333] shadow-2xl p-2 px-6 transition-transform duration-300",
+                    "lg:hidden fixed bottom-6 left-3 right-3 z-50 bg-bg-card/90 backdrop-blur-md rounded-3xl border border-[#333] shadow-2xl p-2 px-4 transition-transform duration-300",
                     !isVisible && "translate-y-[200%]"
                 )}
             >
-                <div className="flex justify-between items-center h-14 max-w-[430px] mx-auto w-full">
+                <div className="flex justify-between items-center h-14 max-w-[480px] mx-auto w-full">
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href;
                         return (
