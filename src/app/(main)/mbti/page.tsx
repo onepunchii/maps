@@ -6,8 +6,6 @@ import { Dog, ArrowRight } from "lucide-react";
 
 import { getPets } from "@/actions/pet";
 
-import { getPets } from "@/actions/pet";
-
 // Helper type for the pet object returned by getPets (inferred)
 type Pet = Awaited<ReturnType<typeof getPets>>[number];
 

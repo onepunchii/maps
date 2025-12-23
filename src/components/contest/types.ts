@@ -6,6 +6,7 @@ export interface ContestEntry {
     caption: string;
     voteCount: number;
     rank?: number;
+    userId?: string;
 }
 
 export interface Contest {
