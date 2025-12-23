@@ -1,5 +1,6 @@
 "use client";
 
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ChevronLeft, Sparkles, Send } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -24,8 +25,14 @@ export default function ConsultPage() {
 
                 {/* Content Area */}
                 <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-6">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-petudy-lime to-green-300 flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(163,223,70,0.3)]">
-                        <span className="text-5xl">🤖</span>
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-petudy-lime to-green-300 flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(163,223,70,0.3)] overflow-hidden">
+                        <div className="w-full h-full transform scale-125">
+                            <DotLottieReact
+                                src="https://lottie.host/fbd4eadc-be4a-44a3-adfb-0630b5bf1647/tBSDMcctNr.lottie"
+                                loop
+                                autoplay
+                            />
+                        </div>
                     </div>
 
                     <h2 className="text-2xl font-bold text-white leading-tight">
