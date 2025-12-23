@@ -8,11 +8,18 @@ interface PhotoCardProps {
     entry: ContestEntry;
     onVote: (id: number) => void;
     isVoted?: boolean;
+    onClick?: () => void;
 }
 
-export function PhotoCard({ entry, onVote, isVoted = false }: PhotoCardProps) {
+export function PhotoCard({ entry, onVote, isVoted = false, onClick }: PhotoCardProps) {
     return (
-        <div className="break-inside-avoid mb-4 group relative overflow-hidden rounded-[20px] bg-bg-card shadow-lg border border-[#333] transition-all hover:border-petudy-lime/50">
+        <div
+            onClick={onClick}
+            className={cn(
+                "break-inside-avoid mb-4 group relative overflow-hidden rounded-[20px] bg-bg-card shadow-lg border border-[#333] transition-all hover:border-petudy-lime/50",
+                onClick && "cursor-pointer active:scale-98"
+            )}
+        >
             {/* Image Container with Aspect Ratio */}
             <div className="relative w-full overflow-hidden">
                 <img

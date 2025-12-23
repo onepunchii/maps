@@ -14,7 +14,7 @@ interface PetPassCardProps {
     mbtiType?: MbtiType;
 }
 
-const mbtiConfig = {
+export const mbtiConfig = {
     ENERGIZER: {
         label: "파워 에너자이저",
         icon: <Zap className="w-4 h-4 text-yellow-500 fill-current" />,

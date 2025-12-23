@@ -2,25 +2,72 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PetPassCard, MbtiType } from "@/components/shared/PetPassCard";
+import { PetPassCard, PetPassData } from "@/components/pet/PetPassCard";
 import { Share2, CheckCircle } from "lucide-react";
+import { MbtiType } from "@/components/shared/PetPassCard"; // Import MbtiType from shared
+import { getPets } from "@/actions/pet";
 
 function MbtiResultContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const type = (searchParams.get("type") as MbtiType) || "SOCIAL";
 
-    const [petName, setPetName] = useState("두부");
-    const [petImage, setPetImage] = useState("https://images.unsplash.com/photo-1591769225440-811ad7d6eca6?q=80&w=800&auto=format&fit=crop");
+    const [petData, setPetData] = useState<PetPassData | null>(null);
 
     useEffect(() => {
-        // Load pet info
-        const storedName = localStorage.getItem("petName");
-        const storedPhoto = localStorage.getItem("petPhoto");
-        if (storedName) setPetName(storedName);
-        if (storedPhoto) setPetImage(storedPhoto);
+        const loadPetData = async () => {
+            try {
+                const pets = await getPets();
+                if (pets && pets.length > 0) {
+                    // Try to find the specific pet selected in Intro
+                    const storedPetId = localStorage.getItem("currentPetId");
+                    const mainPet = pets.find(p => p.id === storedPetId) || pets[0];
 
-        // Confetti effect could go here
+                    // Map to PetPassData
+                    setPetData({
+                        petId: mainPet.id,
+                        name: mainPet.name,
+                        breed: mainPet.breed || "믹스견",
+                        regNum: mainPet.registration_number || "PT-2024-00000",
+                        photo: mainPet.photo_url,
+                        birth: mainPet.birth_date,
+                        gender: mainPet.gender === "male" ? "male" : "female", // Type assertion/mapping
+                        neuter: mainPet.neuter || false,
+                        color: mainPet.color || "모름",
+                        ownerName: "반려인", // TODO: Fetch user nickname
+                        description: "우리 아이 멍BTI 검사가 완료되었습니다!\n이제 펫터디에서 맞춤형 서비스를 받아보세요.",
+                        stats: { // Mock stats for now as DB doesn't have them
+                            size: 3,
+                            shedding: 3,
+                            social: 4,
+                            smart: 5,
+                            indoor: 3
+                        }
+                    });
+                } else {
+                    // Fallback using LocalStorage if no DB data
+                    const storedName = localStorage.getItem("petName") || "두부";
+                    const storedPhoto = localStorage.getItem("petPhoto");
+                    setPetData({
+                        petId: "TEMP",
+                        name: storedName,
+                        breed: "말티즈",
+                        regNum: "PT-TEST-00000",
+                        photo: storedPhoto,
+                        birth: "2023-01-01",
+                        gender: "male",
+                        neuter: true,
+                        color: "화이트",
+                        ownerName: "체험유저",
+                        description: "체험용 등록증입니다.",
+                        stats: { size: 3, shedding: 2, social: 5, smart: 4, indoor: 3 }
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to load pet data:", error);
+            }
+        };
+        loadPetData();
     }, []);
 
     const handleApplyBadge = () => {
@@ -34,7 +81,7 @@ function MbtiResultContent() {
         if (navigator.share) {
             navigator.share({
                 title: '멍BTI 결과',
-                text: `우리 ${petName}의 성격 유형은?`,
+                text: `우리 ${petData?.name || "아이"}의 성격 유형은?`,
                 url: window.location.href,
             });
         } else {
@@ -56,13 +103,17 @@ function MbtiResultContent() {
                 </div>
 
                 {/* Card Display */}
-                <div className="w-full transform transition-all duration-700 hover:scale-105 shadow-2xl">
-                    <PetPassCard
-                        petName={petName}
-                        petImage={petImage}
-                        registrationNumber="PT-2024-00123"
-                        mbtiType={type}
-                    />
+                <div className="transform transition-all duration-700 hover:scale-[1.02] shadow-2xl">
+                    {petData ? (
+                        <PetPassCard
+                            data={petData}
+                            mbtiType={type}
+                        />
+                    ) : (
+                        <div className="w-[400px] h-[640px] flex items-center justify-center bg-[#1f1f1f] rounded-[30px] animate-pulse">
+                            Loading...
+                        </div>
+                    )}
                 </div>
 
                 {/* Actions */}

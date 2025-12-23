@@ -180,3 +180,64 @@ export const petMbtiResults = pgTable("pet_mbti_results", {
     scoreData: jsonb("score_data"), // { energy: 80, social: 20 ... } 상세 점수 저장
     createdAt: timestamp("created_at").defaultNow(),
 });
+
+// ====================================================================
+// NEW: SNS / Social Features
+// ====================================================================
+
+// 1. 팔로우 테이블 (User -> User/Pet)
+// 기획상 "두부(강아지)랑 친구하기"지만, 기술적으로는 User(보호자) 간의 팔로우입니다.
+// 보여줄 때만 "두부"를 팔로우하는 것처럼 UI 처리.
+export const follows = pgTable("follows", {
+    followerId: uuid("follower_id").references(() => users.id).notNull(), // 나
+    followingId: uuid("following_id").references(() => users.id).notNull(), // 상대방 (강아지 보호자)
+    createdAt: timestamp("created_at").defaultNow(),
+}, (t) => ({
+    pk: unique().on(t.followerId, t.followingId), // 중복 팔로우 방지
+}));
+
+// 2. 통합 게시물 테이블 (Posts)
+// 콘테스트용 + 일상용(Daily) 모두 포함
+export const posts = pgTable("posts", {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").references(() => users.id).notNull(),
+    petId: uuid("pet_id").references(() => pets.id).notNull(), // 어떤 강아지의 사진인지
+    imageUrl: text("image_url").notNull(),
+    caption: text("caption"),
+    postType: text("post_type").default('DAILY').notNull(), // 'CONTEST' | 'DAILY'
+    likesCount: integer("likes_count").default(0),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+
+// 3. 댓글 테이블 (Comments) - Optional but recommended for retention
+export const comments = pgTable("comments", {
+    id: serial("id").primaryKey(),
+    postId: integer("post_id").references(() => posts.id).notNull(),
+    userId: uuid("user_id").references(() => users.id).notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Relations for Social
+export const postsRelations = relations(posts, ({ one, many }) => ({
+    user: one(users, {
+        fields: [posts.userId],
+        references: [users.id],
+    }),
+    pet: one(pets, {
+        fields: [posts.petId],
+        references: [pets.id],
+    }),
+    comments: many(comments),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+    post: one(posts, {
+        fields: [comments.postId],
+        references: [posts.id],
+    }),
+    user: one(users, {
+        fields: [comments.userId],
+        references: [users.id],
+    }),
+}));

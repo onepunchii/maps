@@ -90,7 +90,7 @@ export default function MbtiTestPage() {
                 <div className="space-y-4">
                     {currentQuestion.options.map((option, idx) => (
                         <button
-                            key={idx}
+                            key={`${currentStep}-${idx}`} // Force re-render to clear focus/active states
                             onClick={() => handleAnswer(currentQuestion.category, option.score)}
                             className="w-full p-6 text-left bg-bg-card rounded-2xl border border-[#333] hover:border-petudy-lime hover:bg-[#252527] transition-all active:scale-[0.99] group shadow-lg"
                         >

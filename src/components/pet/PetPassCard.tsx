@@ -3,6 +3,8 @@
 import React, { forwardRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
+import { mbtiConfig, MbtiType } from "../shared/PetPassCard";
+
 export interface PetPassStats {
     size: number;
     shedding: number;
@@ -28,9 +30,10 @@ export interface PetPassData {
 
 interface PetPassCardProps {
     data: PetPassData;
+    mbtiType?: MbtiType;
 }
 
-export const PetPassCard = forwardRef<HTMLDivElement, PetPassCardProps>(({ data }, ref) => {
+export const PetPassCard = forwardRef<HTMLDivElement, PetPassCardProps>(({ data, mbtiType }, ref) => {
     const genderDisplay =
         data.gender === "male"
             ? "수컷 (Male)"
@@ -54,6 +57,9 @@ export const PetPassCard = forwardRef<HTMLDivElement, PetPassCardProps>(({ data 
     // Determine background color for stat bars
     const limeColor = "#a3df46";
     const inactiveColor = "rgba(255,255,255,0.1)";
+
+    // MBTI Badge Info
+    const badgeInfo = mbtiType ? mbtiConfig[mbtiType] : null;
 
     return (
         <div
@@ -111,7 +117,32 @@ export const PetPassCard = forwardRef<HTMLDivElement, PetPassCardProps>(({ data 
                 0% { background-position: 200% 0%; }
                 100% { background-position: -200% 0%; }
             }
+            @keyframes badge-pulse {
+                0% { transform: scale(1) rotate(12deg); box-shadow: 0 0 0 0 rgba(163, 223, 70, 0.7); }
+                70% { transform: scale(1.05) rotate(12deg); box-shadow: 0 0 0 10px rgba(163, 223, 70, 0); }
+                100% { transform: scale(1) rotate(12deg); box-shadow: 0 0 0 0 rgba(163, 223, 70, 0); }
+            }
         `}} />
+
+            {/* MBTI Badge Stamp Effect */}
+            {badgeInfo && (
+                <div
+                    className="absolute top-[180px] right-[30px] z-30 flex flex-col items-center justify-center pointer-events-none"
+                    style={{
+                        transform: "rotate(12deg)",
+                        animation: "badge-pulse 2s infinite"
+                    }}
+                >
+                    <div className="rounded-full bg-black/80 backdrop-blur-md border-[3px] border-petudy-lime p-3 shadow-[0_0_20px_rgba(163,223,70,0.5)] flex items-center justify-center w-20 h-20">
+                        <div className="transform scale-150">
+                            {badgeInfo.icon}
+                        </div>
+                    </div>
+                    <div className="mt-2 bg-petudy-lime text-black font-black text-xs px-2 py-1 rounded-full shadow-lg border border-white/20">
+                        {badgeInfo.label}
+                    </div>
+                </div>
+            )}
 
             {/* Content Container (z-10 to sit above holo) */}
             <div className="relative z-10 w-full h-full flex flex-col p-[30px] text-white">

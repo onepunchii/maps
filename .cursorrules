@@ -1,40 +1,22 @@
-# Cursor Rules & Coding Standards
+# Project Rules
 
-## 1. General Principles
+## 1. MCP Tool Usage
+- Actively utilize the following MCP tools for structured and efficient workflow:
+  - `@mcp:TestSprite` (for testing and QA)
+  - `@mcp:context7` (for documentation and library context)
+  - `@mcp:sequential-thinking` (for complex problem decomposition)
 
-- **Framework:** Next.js 14+ (App Router) is the standard. Use Server Components by default.
-- **Language:** TypeScript only. Use strict types (avoid `any`).
-- **Styling:** Tailwind CSS is mandatory. Use `lucide-react` for icons.
-- **State Management:** Use TanStack Query for async data, Zustand for global UI state.
+## 2. Pre-work Analysis (Essential)
+- **Before modifying any code**, you MUST perform a Pros/Cons analysis.
+- **Format**:
+  - **Pros (장점)**: List the benefits of the proposed change.
+  - **Cons (단점)**: List potential drawbacks or risks.
+- **Language**: This analysis MUST be written in **Korean (Hangul)**.
 
-## 2. Mobile First Strategy (CRITICAL)
-
-- **Layout:** All pages must be wrapped in a container with `max-w-[430px] mx-auto min-h-screen` to simulate a mobile app experience on desktop.
-- **UX:** Design for touch interactions (min tap target 44px).
-- **Navigation:** Use Bottom Navigation Bar for main screens.
-- **Responsiveness:** Ensure 100% width on actual mobile devices.
-
-## 3. MCP Tool Usage (MANDATORY)
-
-- **Sequential Thinking:** logic building, refactoring, or architectural planning is required, YOU MUST use the `sequential-thinking` tool to structure your thoughts before writing code.
-- **Context7:**  When using external libraries (Supabase, Drizzle, etc.), YOU MUST use `context7` to fetch the latest documentation and best practices. Do not rely solely on training data.
-  - Example: `resolve-library-id` -> `get-library-docs` -> `implementation`
-
-## 4. Code Style
-
-- Use Functional Components with arrow functions.
-- Use `const` for variable declarations.
-- Async/Await over `.then()`.
-- Filenames: `kebab-case` for files/folders in `app`, `PascalCase` for components.
-
-## 5. Supabase & Database
-
-- Do NOT expose Supabase Service Key in Client side.
-- Use `actions` (Server Actions) for mutations (Create/Update/Delete).
-- Ensure RLS (Row Level Security) policies are enabled on Supabase.
-- Use Drizzle ORM for all database interactions.
-
-## 6. Integrity Protection
-
-- **Do NOT delete existing logic** without confirmation. Comment it out if necessary.
-- Always check `CONTEXT.md` before starting a complex task.
+## 3. Design Guidelines
+- Strictly adhere to the **Petudy Design Guidelines** located at `DESIGN_GUIDELINES.md`.
+- **Core Philosophy**: Apple Human Interface & Glassmorphism.
+- **Key References**:
+  - Use `DESIGN_GUIDELINES.md` as the single source of truth for UI decisions.
+  - Prioritize "Glassmorphism" (frosted glass) effects as defined (blur: 10px, white/black with low opacity).
+  - Use Apple-style typography and spacing (4pt/8pt grid).

@@ -37,14 +37,25 @@ export default function HomePageClient() {
     const petPhoto = currentPet ? currentPet.photo_url : null;
 
     // Services Definition
-    const services = [
+    interface ServiceItem {
+        title: string;
+        icon: string;
+        href: string;
+        isVertical?: boolean;
+        isBanner?: boolean;
+        isMbti?: boolean;
+        isAi?: boolean;
+    }
+
+    const services: ServiceItem[] = [
         { title: "미용 예약", icon: "✂️", href: "/intro?category=BATH" },
         { title: "펫장례", icon: "🕊️", href: "/intro?category=FUNERAL", isVertical: true },
         { title: "건강검진", icon: "🩺", href: "/intro?category=CHECKUP" },
+        { title: "펫터디 AI 상담사", icon: "🤖", href: "/consult", isBanner: true, isAi: true }, // AI Counselor Banner
         { title: "펫터디 멤버십", icon: "👑", href: "/membership", isBanner: true }, // Landing Banner
-        { title: "펫보험", icon: "🛡️", href: "/booking/new?category=INSURANCE" },
-        { title: "펫상조", icon: "🌺", href: "/booking/new?category=MUTUAL_AID" },
-        { title: "펫여행", icon: "🛡️", href: "/booking/new?category=TRAVEL" },
+        { title: "펫보험", icon: "🛡️", href: "/life/insurance" },
+        { title: "펫상조", icon: "🌺", href: "/life/sangjo" },
+        { title: "펫여행", icon: "🚗", href: "/life/travel" }, // Updated icon to Car for Travel
         { title: "멍BTI", icon: "🧠", href: "/mbti", isMbti: true },
     ];
 
@@ -142,20 +153,32 @@ export default function HomePageClient() {
                         href={s.href}
                         className={`bg-bg-card rounded-3xl p-5 flex items-center justify-center gap-3 hover:bg-[#252527] transition-all relative overflow-hidden group active:scale-[0.98] 
                         ${s.isVertical ? "row-span-2 h-full flex-col" : ""} 
-                        ${s.isBanner ? "col-span-2 aspect-[3/1] flex-row px-8 justify-between bg-gradient-to-r from-[#2c2c2e] to-[#1c1c1e] border border-[#333]" : ""} 
+                        ${s.isBanner
+                                ? s.isAi
+                                    ? "col-span-2 aspect-[4/1] flex-row px-8 justify-between bg-gradient-to-r from-[#1c1c1e] to-petudy-lime/10 border border-petudy-lime/30"
+                                    : "col-span-2 aspect-[4/1] flex-row px-8 justify-between bg-gradient-to-r from-[#2c2c2e] to-[#1c1c1e] border border-[#333]"
+                                : ""
+                            } 
                         ${!s.isVertical && !s.isBanner ? "aspect-[4/3] flex-col" : ""}
                         ${s.isMbti ? "border border-petudy-lime/20" : ""}
                         `}
                     >
                         {s.isMbti && <div className="absolute top-3 right-3 w-2 h-2 bg-petudy-lime rounded-full animate-pulse shadow-[0_0_8px_#A3DF46]"></div>}
+                        {s.isAi && <div className="absolute top-0 right-0 w-20 h-20 bg-petudy-lime blur-[50px] opacity-20 pointer-events-none"></div>}
 
                         <div className={`w-14 h-14 bg-bg-input rounded-full flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform duration-300 ${s.isBanner ? "order-2" : ""}`}>
                             {s.icon}
                         </div>
 
                         <div className={s.isBanner ? "order-1" : ""}>
-                            <span className={`font-medium text-gray-200 ${s.isBanner ? "text-lg font-bold" : "text-sm"}`}>{s.title}</span>
-                            {s.isBanner && <p className="text-xs text-petudy-lime mt-1 font-light">프리미엄 혜택 받기</p>}
+                            <span className={`font-medium text-gray-200 ${s.isBanner ? "text-lg font-bold" : "text-sm"}`}>
+                                {s.title}
+                            </span>
+                            {s.isBanner && (
+                                <p className={`text-xs mt-1 font-light ${s.isAi ? "text-petudy-lime" : "text-gray-400"}`}>
+                                    {s.isAi ? "무엇이든 물어보세요" : "프리미엄 혜택 받기"}
+                                </p>
+                            )}
                         </div>
                     </Link>
                 ))}

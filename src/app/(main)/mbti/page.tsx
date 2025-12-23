@@ -4,20 +4,54 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Dog, ArrowRight } from "lucide-react";
 
+import { getPets } from "@/actions/pet";
+
+import { getPets } from "@/actions/pet";
+
+// Helper type for the pet object returned by getPets (inferred)
+type Pet = Awaited<ReturnType<typeof getPets>>[number];
+
 export default function MbtiIntroPage() {
     const router = useRouter();
-    const [petName, setPetName] = useState<string>("두부");
-    const [petImage, setPetImage] = useState<string | null>(null);
+    const [pets, setPets] = useState<Pet[]>([]);
+    const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
+
+    // Fallback loading state
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Determine pet from localStorage or default
-        const storedName = localStorage.getItem("petName");
-        const storedPhoto = localStorage.getItem("petPhoto");
-        if (storedName) setPetName(storedName);
-        if (storedPhoto) setPetImage(storedPhoto);
+        const loadPetData = async () => {
+            try {
+                // 1. Try fetching from DB
+                const fetchedPets = await getPets();
+                if (fetchedPets && fetchedPets.length > 0) {
+                    setPets(fetchedPets);
+                    setSelectedPet(fetchedPets[0]);
+                } else {
+                    // Fallback to localStorage dummy logic if absolutely no DB data
+                    // For now, if no pets, we might want to prompt creation or show dummy
+                    // Keeping existing fallback for consistency but adapted
+                    const storedName = localStorage.getItem("petName");
+                    const dummyPet: any = { id: "temp", name: storedName || "두부", photo_url: localStorage.getItem("petPhoto") };
+                    setPets([dummyPet]);
+                    setSelectedPet(dummyPet);
+                }
+            } catch (error) {
+                console.error("Failed to load pet data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadPetData();
     }, []);
 
     const handleStart = () => {
+        // Optionally save the selected pet ID to storage or URL for the test to use
+        if (selectedPet) {
+            localStorage.setItem("currentPetId", selectedPet.id);
+            localStorage.setItem("petName", selectedPet.name); // Keep legacy sync
+            if (selectedPet.photo_url) localStorage.setItem("petPhoto", selectedPet.photo_url);
+        }
         router.push("/mbti/test");
     };
 
@@ -37,9 +71,39 @@ export default function MbtiIntroPage() {
 
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 z-10 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
 
+                {/* Pet Selection Area */}
+                <div className="w-full max-w-xs mb-4">
+                    <p className="text-xs text-gray-500 mb-3 font-medium">분석할 아이를 선택해주세요</p>
+                    <div className="flex gap-4 overflow-x-auto pb-4 justify-center items-center scrollbar-hide">
+                        {pets.map((pet) => {
+                            const isSelected = selectedPet?.id === pet.id;
+                            return (
+                                <button
+                                    key={pet.id}
+                                    onClick={() => setSelectedPet(pet)}
+                                    className={`flex flex-col items-center gap-2 transition-all duration-300 ${isSelected ? "scale-110 opacity-100" : "scale-100 opacity-50 grayscale hover:grayscale-0 hover:opacity-80"}`}
+                                >
+                                    <div className={`relative w-14 h-14 rounded-full overflow-hidden border-2 ${isSelected ? "border-petudy-lime shadow-[0_0_15px_rgba(163,223,70,0.4)]" : "border-transparent bg-white/10"}`}>
+                                        {pet.photo_url ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img src={pet.photo_url} alt={pet.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-700 text-xl">🐶</div>
+                                        )}
+                                    </div>
+                                    <span className={`text-xs font-medium ${isSelected ? "text-petudy-lime" : "text-gray-400"}`}>
+                                        {pet.name}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                        {/* 'Add Pet' placeholder if needed, omitted for now to keep it clean */}
+                    </div>
+                </div>
+
                 <div>
                     <h2 className="text-2xl font-bold text-white mb-2 tracking-tight leading-tight">
-                        우리 {petName},<br />사실 <span className="text-petudy-lime">사람</span> 아닐까?
+                        우리 {selectedPet?.name || "아이"}이,<br />사실 <span className="text-petudy-lime">사람</span> 아닐까?
                     </h2>
                     <p className="text-gray-400 leading-relaxed font-light text-sm">
                         행동 분석을 통해 아이의 성향을 파악하고<br />
