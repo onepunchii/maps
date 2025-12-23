@@ -67,7 +67,6 @@ export default function HomePageClient() {
             isBanner: true,
             isAi: true
         }, // AI Counselor Banner
-        { title: "펫터디 멤버십", icon: "👑", href: "/membership", isBanner: true }, // Landing Banner
         { title: "펫보험", icon: "🛡️", href: "/life/insurance" },
         { title: "펫상조", icon: "🌺", href: "/life/sangjo" },
         { title: "펫여행", icon: "🚗", href: "/life/travel" }, // Updated icon to Car for Travel
