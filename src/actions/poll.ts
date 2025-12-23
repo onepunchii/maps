@@ -158,3 +158,192 @@ export async function votePoll(pollId: number, optionId: number) {
         return { success: false, message: "투표 중 오류가 발생했습니다." };
     }
 }
+
+// ----------------------------------------------------------------------
+// NEW: Expansion Features
+// ----------------------------------------------------------------------
+
+export async function getPolls(limit = 10, offset = 0) {
+    try {
+        const supabase = await createClient();
+
+        const { data: pollsData, error } = await supabase
+            .from("polls")
+            .select(`
+                *,
+                poll_options (*),
+                poll_votes (count)
+            `)
+            .eq("status", "OPEN")
+            .order("created_at", { ascending: false })
+            .range(offset, offset + limit - 1); // Pagination
+
+        if (error) throw error;
+
+        // Process data to match Poll interface
+        // Note: Supabase Drizzle helper or raw query might be cleaner, 
+        // but adapting basic query for now.
+        // We'll calculate totals on the fly from options if needed.
+
+        // Wait, 'poll_votes(count)' isn't working directly without aggregation setup in Supabase sometimes?
+        // Let's rely on option.vote_count which we increment manually in votePoll.
+
+        const formattedPolls: Poll[] = pollsData.map((p: any) => {
+            const options = p.poll_options || [];
+            const totalVotes = options.reduce((acc: number, curr: any) => acc + (curr.vote_count || 0), 0);
+
+            return {
+                id: p.id,
+                title: p.title,
+                pollType: p.poll_type,
+                options: options.map((opt: any) => ({
+                    id: opt.id,
+                    text: opt.option_text,
+                    image_url: opt.image_url,
+                    vote_count: opt.vote_count
+                })),
+                total_votes: totalVotes
+            };
+        });
+
+        return formattedPolls;
+
+    } catch (error) {
+        console.error("Error fetching polls list:", error);
+        return [];
+    }
+}
+
+export interface CreatePollData {
+    title: string;
+    type: "VS_IMAGE" | "TEXT_CHOICE";
+    options: {
+        text: string;
+        image?: string;
+    }[];
+}
+
+export async function createPoll(data: CreatePollData) {
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) return { success: false, message: "Unauthorized" };
+
+        // 1. Create Poll
+        const { data: newPoll, error: pollError } = await supabase
+            .from("polls")
+            .insert({
+                creator_id: user.id,
+                title: data.title,
+                poll_type: data.type,
+                status: "OPEN"
+            })
+            .select()
+            .single();
+
+        if (pollError) throw pollError;
+
+        // 2. Create Options
+        const optionsToInsert = data.options.map(opt => ({
+            poll_id: newPoll.id,
+            option_text: opt.text,
+            image_url: opt.image || null,
+            vote_count: 0
+        }));
+
+        const { error: optionError } = await supabase
+            .from("poll_options")
+            .insert(optionsToInsert);
+
+        if (optionError) throw optionError;
+
+        revalidatePath("/");
+        revalidatePath("/community/petpick");
+
+        return { success: true, pollId: newPoll.id };
+
+    } catch (error) {
+        console.error("Create poll error:", error);
+        return { success: false, message: "Failed to create poll" };
+    }
+}
+
+export async function getNextPoll(excludeIds: number[]): Promise<Poll | null> {
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // 1. Fetch ids of open polls not in exclude list
+        let query = supabase
+            .from("polls")
+            .select("id")
+            .eq("status", "OPEN");
+
+        if (excludeIds.length > 0) {
+            query = query.not("id", "in", `(${excludeIds.join(',')})`);
+        }
+
+        const { data: candidatePolls, error } = await query;
+
+        if (error || !candidatePolls || candidatePolls.length === 0) {
+            return null; // No more polls
+        }
+
+        // 2. Randomly select one ID
+        const randomIndex = Math.floor(Math.random() * candidatePolls.length);
+        const nextPollId = candidatePolls[randomIndex].id;
+
+        // 3. Reuse getLatestPoll logic or fetch specifically
+        // For simplicity, let's just fetch full details for this ID
+        // Note: Ideally we refactor 'getLatestPoll' to 'getPollById' but duplicating logic for MVP speed is okay.
+
+        const { data: pollData } = await supabase
+            .from("polls")
+            .select("*")
+            .eq("id", nextPollId)
+            .single();
+
+        if (!pollData) return null;
+
+        const { data: optionsData } = await supabase
+            .from("poll_options")
+            .select("*")
+            .eq("poll_id", pollData.id)
+            .order("id", { ascending: true });
+
+        // Check vote status
+        let userVotedOptionId = null;
+        if (user) {
+            const { data: voteData } = await supabase
+                .from("poll_votes")
+                .select("option_id")
+                .eq("poll_id", pollData.id)
+                .eq("user_id", user.id)
+                .single();
+            if (voteData) userVotedOptionId = voteData.option_id;
+        }
+
+        const options = optionsData || [];
+        const totalVotes = options.reduce((acc: number, curr: any) => acc + (curr.vote_count || 0), 0);
+        const formattedOptions: PollOption[] = options.map((opt: any) => ({
+            id: opt.id,
+            text: opt.option_text,
+            image_url: opt.image_url,
+            vote_count: opt.vote_count || 0,
+            percent: totalVotes === 0 ? 0 : Math.round(((opt.vote_count || 0) / totalVotes) * 100)
+        }));
+
+        return {
+            id: pollData.id,
+            title: pollData.title,
+            options: formattedOptions,
+            total_votes: totalVotes,
+            user_voted_option_id: userVotedOptionId
+        };
+
+    } catch (error) {
+        console.error("Error fetching next poll:", error);
+        return null;
+    }
+}
