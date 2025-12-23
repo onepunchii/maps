@@ -36,6 +36,8 @@ const INITIAL_ENTRIES: ContestEntry[] = [
 import { UploadEntrySheet } from "@/components/contest/UploadEntrySheet";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/client";
+import { createPost, getFeed } from "@/actions/social";
 
 export default function ContestPage() {
     const router = useRouter();

@@ -3,10 +3,19 @@
 import { useEffect, useState } from "react";
 import { X, Camera, Image as ImageIcon } from "lucide-react";
 
+import { getPets } from "@/actions/pet";
+
+interface Pet {
+    id: string;
+    name: string;
+    photo_url: string | null;
+    breed: string | null;
+}
+
 interface UploadEntrySheetProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: { petId: number; image: File | null; caption: string }) => void;
+    onSubmit: (data: { petId: string; image: File | null; caption: string }) => Promise<void>;
 }
 
 export function UploadEntrySheet({ isOpen, onClose, onSubmit }: UploadEntrySheetProps) {
@@ -14,11 +23,26 @@ export function UploadEntrySheet({ isOpen, onClose, onSubmit }: UploadEntrySheet
     const [isVisible, setIsVisible] = useState(false);
     const [caption, setCaption] = useState("");
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    // Pet Selection
+    const [pets, setPets] = useState<Pet[]>([]);
+    const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
 
     useEffect(() => {
         if (isOpen) {
             setShouldRender(true);
             const timer = setTimeout(() => setIsVisible(true), 10);
+
+            // Fetch Pets
+            getPets().then(data => {
+                if (data && data.length > 0) {
+                    setPets(data);
+                    setSelectedPet(data[0]);
+                }
+            });
+
             return () => clearTimeout(timer);
         } else {
             setIsVisible(false);
@@ -30,6 +54,7 @@ export function UploadEntrySheet({ isOpen, onClose, onSubmit }: UploadEntrySheet
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setImageFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setSelectedImage(reader.result as string);
@@ -38,18 +63,28 @@ export function UploadEntrySheet({ isOpen, onClose, onSubmit }: UploadEntrySheet
         }
     };
 
-    const handleCreateSubmit = () => {
-        // Mock submit
-        onSubmit({ petId: 1, image: null, caption });
-        setCaption("");
-        setSelectedImage(null);
-        onClose();
+    const handleCreateSubmit = async () => {
+        if (!selectedPet || !imageFile) return;
+
+        setLoading(true);
+        try {
+            await onSubmit({ petId: selectedPet.id, image: imageFile, caption });
+            setCaption("");
+            setSelectedImage(null);
+            setImageFile(null);
+            onClose();
+        } catch (error) {
+            console.error(error);
+            alert("업로드에 실패했습니다.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!shouldRender) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center">
             {/* Backdrop */}
             <div
                 className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${isVisible ? "opacity-100" : "opacity-0"
@@ -77,19 +112,37 @@ export function UploadEntrySheet({ isOpen, onClose, onSubmit }: UploadEntrySheet
                 </div>
 
                 <div className="space-y-6">
-                    {/* Pet Selection (Mock) */}
+                    {/* Pet Selection */}
                     <div>
                         <label className="block text-sm font-bold text-gray-400 mb-2">참여할 아이</label>
-                        <div className="flex items-center gap-3 p-3 bg-bg-input border border-[#333] rounded-2xl">
-                            <div className="w-10 h-10 bg-bg-card rounded-full flex items-center justify-center text-lg shadow-sm border border-[#333]">
-                                🐶
+                        {pets.length > 0 && selectedPet ? (
+                            <div className="flex items-center gap-3 p-3 bg-bg-input border border-[#333] rounded-2xl">
+                                <div className="w-10 h-10 bg-bg-card rounded-full flex items-center justify-center text-lg shadow-sm border border-[#333] overflow-hidden">
+                                    {selectedPet.photo_url ? (
+                                        <img src={selectedPet.photo_url} alt={selectedPet.name} className="w-full h-full object-cover" />
+                                    ) : "🐶"}
+                                </div>
+                                <div className="flex-1">
+                                    <p className="font-bold text-white">{selectedPet.name}</p>
+                                    <p className="text-xs text-petudy-lime font-medium">{selectedPet.breed || "대표 반려동물"}</p>
+                                </div>
+                                {/* Simple toggle for demo or fetch list */}
+                                {pets.length > 1 && (
+                                    <button
+                                        onClick={() => {
+                                            const currentIndex = pets.findIndex(p => p.id === selectedPet.id);
+                                            const nextIndex = (currentIndex + 1) % pets.length;
+                                            setSelectedPet(pets[nextIndex]);
+                                        }}
+                                        className="text-xs text-gray-500 underline hover:text-gray-300"
+                                    >
+                                        변경
+                                    </button>
+                                )}
                             </div>
-                            <div className="flex-1">
-                                <p className="font-bold text-white">두부</p>
-                                <p className="text-xs text-petudy-lime font-medium">대표 반려동물</p>
-                            </div>
-                            <button className="text-xs text-gray-500 underline hover:text-gray-300">변경</button>
-                        </div>
+                        ) : (
+                            <div className="text-gray-500 text-sm">반려동물을 등록해주세요.</div>
+                        )}
                     </div>
 
                     {/* Image Upload */}
