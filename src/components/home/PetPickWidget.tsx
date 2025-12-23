@@ -1,7 +1,11 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Check, MessageCircle, Share2, Sparkles } from "lucide-react";
+import { Check, MessageCircle, Share2 } from "lucide-react";
 import { Poll, votePoll, getNextPoll } from "@/actions/poll";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import PollCommentSheet from "../poll/PollCommentSheet";
 
 interface PetPickWidgetProps {
     initialPoll: Poll | null;
@@ -11,6 +15,7 @@ export default function PetPickWidget({ initialPoll }: PetPickWidgetProps) {
     const [poll, setPoll] = useState<Poll | null>(initialPoll);
     const [isVoting, setIsVoting] = useState(false);
     const [viewedPollIds, setViewedPollIds] = useState<number[]>([]);
+    const [isCommentOpen, setIsCommentOpen] = useState(false);
 
     useEffect(() => {
         if (initialPoll) {
@@ -42,8 +47,6 @@ export default function PetPickWidget({ initialPoll }: PetPickWidgetProps) {
             };
         });
 
-        // Recalculate other percents to ensure ~100% total (simplified)
-
         setPoll({
             ...poll,
             options: newOptions,
@@ -54,26 +57,44 @@ export default function PetPickWidget({ initialPoll }: PetPickWidgetProps) {
         // 2. Server Call
         const res = await votePoll(poll.id, optionId);
         if (!res.success) {
-            // Revert on failure (omitted for brevity in MVP)
             console.error(res.message);
         }
 
         // 3. Auto-load Next Poll (Infinite Flow)
         setTimeout(async () => {
-            // Fetch next poll excluding currently viewed ones
-            // Note: In a real app, 'viewedPollIds' limit might need management (e.g. keep last 10)
             const nextPoll = await getNextPoll(viewedPollIds);
 
             if (nextPoll) {
-                // Animate out? For MVP, instantaneous switch with fade-in effect via key change
                 setPoll(nextPoll);
                 setViewedPollIds(prev => [...prev, nextPoll.id]);
                 setIsVoting(false);
             } else {
-                // No more polls logic (keep current result or show 'Done')
                 setIsVoting(false);
             }
-        }, 2000); // 2 seconds delay to see results
+        }, 2000);
+    };
+
+    const handleShare = async () => {
+        if (!poll) return;
+        const url = window.location.href; // Or specific poll URL
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: poll.title,
+                    text: '이 펫픽에 투표해주세요!',
+                    url: url,
+                });
+            } catch (err) {
+                console.log('Share canceled', err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(url);
+                alert("링크가 복사되었습니다!");
+            } catch (err) {
+                console.error("Copy failed", err);
+            }
+        }
     };
 
     if (!poll) return null;
@@ -87,7 +108,14 @@ export default function PetPickWidget({ initialPoll }: PetPickWidgetProps) {
                         LIVE
                     </span>
                     <h2 className="text-xl font-bold text-white leading-tight flex items-center gap-1">
-                        오늘의 펫픽 <Sparkles className="w-4 h-4 text-yellow-400" />
+                        오늘의 펫픽
+                        <div className="w-[60px] h-[60px] -my-4 flex items-center justify-center">
+                            <DotLottieReact
+                                src="https://lottie.host/ef31ea2f-3a6a-4176-be9c-146569cc637f/t4OeWfqFOd.lottie"
+                                loop
+                                autoplay
+                            />
+                        </div>
                     </h2>
                 </div>
                 <span className="text-xs text-gray-500">{poll.total_votes.toLocaleString()}명 참여 중</span>
@@ -172,17 +200,29 @@ export default function PetPickWidget({ initialPoll }: PetPickWidgetProps) {
 
             {/* Footer Action */}
             <div className="mt-4 flex justify-between items-center px-1">
-                <button className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors">
+                <button
+                    onClick={() => setIsCommentOpen(true)}
+                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
+                >
                     <MessageCircle className="w-4 h-4" />
                     <span>댓글 달기</span>
                 </button>
                 <div className="flex gap-2">
-                    <button className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors">
+                    <button
+                        onClick={handleShare}
+                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
+                    >
                         <Share2 className="w-4 h-4" />
                         <span>공유</span>
                     </button>
                 </div>
             </div>
+
+            <PollCommentSheet
+                pollId={poll.id}
+                isOpen={isCommentOpen}
+                onClose={() => setIsCommentOpen(false)}
+            />
         </section>
     );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { RankingBanner } from "@/components/contest/RankingBanner";
+import { ContestPrizeBanner } from "@/components/contest/ContestPrizeBanner";
 import { PhotoCard } from "@/components/contest/PhotoCard";
 import { FloatingActionButton } from "@/components/contest/FloatingActionButton";
 import { ContestEntry } from "@/components/contest/types";
@@ -45,6 +46,7 @@ export default function ContestPage() {
     const [votedIds, setVotedIds] = useState<number[]>([]);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(12);
+    const [isPrizePopupOpen, setIsPrizePopupOpen] = useState(true); // Default open
 
     // Popup State
     const [recommendation, setRecommendation] = useState<ContestEntry | null>(null);
@@ -91,7 +93,7 @@ export default function ContestPage() {
         setCurrentMonth(prev => prev === 12 ? 1 : prev + 1);
     };
 
-    const handleUploadSubmit = (data: { petId: number; image: File | null; caption: string }) => {
+    const handleUploadSubmit = async (data: { petId: string; image: File | null; caption: string }) => {
         // ... (existing logic)
         const newEntry: ContestEntry = {
             id: Date.now(),
@@ -127,6 +129,11 @@ export default function ContestPage() {
 
             {/* Main Content */}
             <main>
+                {/* Prize Popup */}
+                {isPrizePopupOpen && (
+                    <ContestPrizeBanner onClose={() => setIsPrizePopupOpen(false)} />
+                )}
+
                 <section className="mb-2">
                     <RankingBanner topEntries={topEntries} />
                 </section>

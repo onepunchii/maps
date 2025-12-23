@@ -171,8 +171,7 @@ export async function getPolls(limit = 10, offset = 0) {
             .from("polls")
             .select(`
                 *,
-                poll_options (*),
-                poll_votes (count)
+                poll_options (*)
             `)
             .eq("status", "OPEN")
             .order("created_at", { ascending: false })
@@ -345,5 +344,81 @@ export async function getNextPoll(excludeIds: number[]): Promise<Poll | null> {
     } catch (error) {
         console.error("Error fetching next poll:", error);
         return null;
+    }
+}
+
+// ----------------------------------------------------------------------
+// Comments
+// ----------------------------------------------------------------------
+
+export interface PollComment {
+    id: number;
+    pollId: number;
+    userId: string;
+    content: string;
+    createdAt: string;
+    user?: {
+        nickname: string | null;
+        avatarUrl: string | null;
+    };
+}
+
+export async function getPollComments(pollId: number): Promise<PollComment[]> {
+    try {
+        const supabase = await createClient();
+
+        const { data, error } = await supabase
+            .from("poll_comments")
+            .select(`
+                *,
+                user:users (nickname, avatar_url)
+            `)
+            .eq("poll_id", pollId)
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        return data.map((c: any) => ({
+            id: c.id,
+            pollId: c.poll_id,
+            userId: c.user_id,
+            content: c.content,
+            createdAt: c.created_at,
+            user: {
+                nickname: c.user?.nickname || "익명",
+                avatarUrl: c.user?.avatar_url
+            }
+        }));
+
+    } catch (error) {
+        console.error("Error fetching comments:", error);
+        return [];
+    }
+}
+
+export async function addPollComment(pollId: number, content: string) {
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) return { success: false, message: "로그인이 필요합니다." };
+
+        const { error } = await supabase
+            .from("poll_comments")
+            .insert({
+                poll_id: pollId,
+                user_id: user.id,
+                content: content
+            });
+
+        if (error) throw error;
+
+        revalidatePath("/");
+
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error adding comment:", error);
+        return { success: false, message: "댓글 등록 실패" };
     }
 }

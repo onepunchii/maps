@@ -276,10 +276,20 @@ export const pollVotes = pgTable("poll_votes", {
     unq: unique().on(t.pollId, t.userId), // 한 투표당 한 번만 참여 가능
 }));
 
+// 4. 투표 댓글(Poll Comments)
+export const pollComments = pgTable("poll_comments", {
+    id: serial("id").primaryKey(),
+    pollId: integer("poll_id").references(() => polls.id).notNull(),
+    userId: uuid("user_id").references(() => users.id).notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations for Polls
 export const pollsRelations = relations(polls, ({ many }) => ({
     options: many(pollOptions),
     votes: many(pollVotes),
+    comments: many(pollComments),
 }));
 
 export const pollOptionsRelations = relations(pollOptions, ({ one, many }) => ({
@@ -301,6 +311,17 @@ export const pollVotesRelations = relations(pollVotes, ({ one }) => ({
     }),
     user: one(users, {
         fields: [pollVotes.userId],
+        references: [users.id],
+    }),
+}));
+
+export const pollCommentsRelations = relations(pollComments, ({ one }) => ({
+    poll: one(polls, {
+        fields: [pollComments.pollId],
+        references: [polls.id],
+    }),
+    user: one(users, {
+        fields: [pollComments.userId],
         references: [users.id],
     }),
 }));

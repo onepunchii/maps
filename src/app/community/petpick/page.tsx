@@ -2,6 +2,7 @@ import { getPolls } from "@/actions/poll";
 import Link from "next/link";
 import { ChevronLeft, Plus } from "lucide-react";
 import PetPickWidget from "@/components/home/PetPickWidget";
+import PetPickAnimation from "@/components/ui/PetPickAnimation";
 
 export const dynamic = "force-dynamic";
 
@@ -23,8 +24,13 @@ export default async function PollListPage() {
             {/* Content */}
             <div className="p-6 space-y-8 pb-32">
                 <div className="space-y-2">
-                    <h2 className="text-xl font-bold">진행 중인 투표 🔥</h2>
-                    <p className="text-gray-400 text-sm">
+                    <h2 className="text-xl font-bold flex items-center gap-1">
+                        진행 중인 투표
+                        <div className="w-[60px] h-[60px] -my-4 flex items-center justify-center">
+                            <PetPickAnimation />
+                        </div>
+                    </h2>
+                    <p className="text-gray-400 text-sm mt-5">
                         다른 보호자님들의 고민을 해결해주세요!
                     </p>
                 </div>
