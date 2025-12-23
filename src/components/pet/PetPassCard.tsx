@@ -130,7 +130,7 @@ export const PetPassCard = forwardRef<HTMLDivElement, PetPassCardProps>(({ data,
                     className="absolute top-[180px] right-[30px] z-30 flex flex-col items-center justify-center pointer-events-none"
                     style={{
                         transform: "rotate(12deg)",
-                        animation: "badge-pulse 2s infinite"
+                        // animation: "badge-pulse 2s infinite" // Validation: User requested to remove blinking square
                     }}
                 >
                     <div className="rounded-full bg-black/80 backdrop-blur-md border-[3px] border-petudy-lime p-3 shadow-[0_0_20px_rgba(163,223,70,0.5)] flex items-center justify-center w-20 h-20">
@@ -139,7 +139,7 @@ export const PetPassCard = forwardRef<HTMLDivElement, PetPassCardProps>(({ data,
                         </div>
                     </div>
                     <div className="mt-2 bg-petudy-lime text-black font-black text-xs px-2 py-1 rounded-full shadow-lg border border-white/20">
-                        {badgeInfo.label}
+                        {data.gender === 'male' ? badgeInfo.label.replace("공주님", "왕자님") : badgeInfo.label}
                     </div>
                 </div>
             )}

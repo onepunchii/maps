@@ -101,7 +101,7 @@ export default function MbtiIntroPage() {
 
                 <div>
                     <h2 className="text-2xl font-bold text-white mb-2 tracking-tight leading-tight">
-                        우리 <span className="text-petudy-lime">{selectedPet?.name || "아이"}</span>이,<br />사실 <span className="text-petudy-lime">사람</span> 아닐까?
+                        우리 <span className="text-petudy-lime">{selectedPet?.name || "아이"}</span>,<br />사실 <span className="text-petudy-lime">사람</span> 아닐까?
                     </h2>
                     <p className="text-gray-400 leading-relaxed font-light text-sm">
                         행동 분석을 통해 아이의 성향을 파악하고<br />
