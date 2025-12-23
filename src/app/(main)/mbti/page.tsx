@@ -67,12 +67,12 @@ export default function MbtiIntroPage() {
                 <div className="w-8" /> {/* Spacer for centering */}
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 z-10 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4 z-10 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
 
                 {/* Pet Selection Area */}
-                <div className="w-full max-w-xs mb-4">
-                    <p className="text-xs text-gray-500 mb-3 font-medium">분석할 아이를 선택해주세요</p>
-                    <div className="flex gap-4 overflow-x-auto pb-4 justify-center items-center scrollbar-hide">
+                <div className="w-full max-w-xs mb-2">
+                    <p className="text-xs text-gray-500 mb-1 font-medium">분석할 아이를 선택해주세요</p>
+                    <div className="flex gap-4 overflow-x-auto p-4 justify-center items-center scrollbar-hide">
                         {pets.map((pet) => {
                             const isSelected = selectedPet?.id === pet.id;
                             return (
