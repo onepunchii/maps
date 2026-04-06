@@ -46,7 +46,7 @@ export default function PollCommentSheet({ pollId, isOpen, onClose }: PollCommen
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex justify-center items-end lg:items-center">
+        <div className="fixed inset-0 z-[100] flex justify-center items-end lg:items-center">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
