@@ -12,7 +12,7 @@ export default function AppLayout({
             <CompanyIntroSidebar />
 
             {/* Mobile Container (Centered) */}
-            <main className="w-full max-w-[512px] bg-bg-main h-[100dvh] shadow-2xl relative overflow-y-auto overflow-x-hidden border-x border-[#121212] z-10 scrollbar-hide">
+            <main className="w-full max-w-[512px] bg-bg-main h-[100dvh] shadow-2xl relative overflow-y-auto overflow-x-hidden border-x border-[#121212] z-10 hide-scrollbar">
                 {children}
             </main>
 
